@@ -403,6 +403,47 @@
     .server-detail-label i { color: var(--accent); width: 14px; text-align: center; }
     .server-detail-value { color: var(--text); font-weight: 600; font-family: monospace; font-size: 0.8rem; }
 
+    /* OS info grid — stacked label/value, wraps cleanly */
+    .os-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border-radius: var(--radius2);
+      overflow: hidden;
+    }
+    .os-cell {
+      background: var(--card);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+    .os-cell-wide { grid-column: span 2; }
+    @media (max-width: 600px) {
+      .os-cell-wide { grid-column: span 1; }
+    }
+    .os-label {
+      font-size: 0.7rem;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .os-label i { color: var(--accent); width: 14px; text-align: center; }
+    .os-value {
+      color: var(--text);
+      font-weight: 600;
+      font-family: monospace;
+      font-size: 0.78rem;
+      word-break: break-all;
+      line-height: 1.45;
+    }
+
     .online-badge {
       display: inline-flex; align-items: center; gap: 6px;
       background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3);
@@ -1298,30 +1339,30 @@
       <div class="card-header">
         <div class="card-title"><i class="fa-solid fa-desktop"></i> Operating System</div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));padding:0 4px;">
-        <div class="server-detail-row" style="padding:11px 16px;">
-          <div class="server-detail-label"><i class="fa-solid fa-linux"></i> Platform</div>
-          <div class="server-detail-value" id="si-platform">—</div>
+      <div class="os-grid">
+        <div class="os-cell">
+          <div class="os-label"><i class="fa-solid fa-linux"></i> Platform</div>
+          <div class="os-value" id="si-platform">—</div>
         </div>
-        <div class="server-detail-row" style="padding:11px 16px;">
-          <div class="server-detail-label"><i class="fa-solid fa-code-branch"></i> OS Type</div>
-          <div class="server-detail-value" id="si-ostype">—</div>
+        <div class="os-cell">
+          <div class="os-label"><i class="fa-solid fa-code-branch"></i> OS Type</div>
+          <div class="os-value" id="si-ostype">—</div>
         </div>
-        <div class="server-detail-row" style="padding:11px 16px;">
-          <div class="server-detail-label"><i class="fa-solid fa-cube"></i> Architecture</div>
-          <div class="server-detail-value" id="si-arch">—</div>
+        <div class="os-cell">
+          <div class="os-label"><i class="fa-solid fa-cube"></i> Architecture</div>
+          <div class="os-value" id="si-arch">—</div>
         </div>
-        <div class="server-detail-row" style="padding:11px 16px;">
-          <div class="server-detail-label"><i class="fa-solid fa-code"></i> Kernel</div>
-          <div class="server-detail-value" id="si-release">—</div>
+        <div class="os-cell os-cell-wide">
+          <div class="os-label"><i class="fa-solid fa-code"></i> Kernel</div>
+          <div class="os-value" id="si-release">—</div>
         </div>
-        <div class="server-detail-row" style="padding:11px 16px;">
-          <div class="server-detail-label"><i class="fa-brands fa-node-js" style="color:#68a063;"></i> Node.js</div>
-          <div class="server-detail-value" id="si-nodever">—</div>
+        <div class="os-cell">
+          <div class="os-label"><i class="fa-brands fa-node-js" style="color:#68a063;"></i> Node.js</div>
+          <div class="os-value" id="si-nodever">—</div>
         </div>
-        <div class="server-detail-row" style="padding:11px 16px;border-bottom:none;">
-          <div class="server-detail-label"><i class="fa-solid fa-microchip"></i> CPU Model</div>
-          <div class="server-detail-value" id="si-cpumodel" style="font-size:0.72rem;">—</div>
+        <div class="os-cell os-cell-wide">
+          <div class="os-label"><i class="fa-solid fa-microchip"></i> CPU Model</div>
+          <div class="os-value" id="si-cpumodel">—</div>
         </div>
       </div>
     </div>
