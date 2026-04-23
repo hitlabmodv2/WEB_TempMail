@@ -39,12 +39,41 @@
       min-height: 100vh;
       overflow-x: clip;
       -webkit-text-size-adjust: 100%;
+      position: relative;
+    }
+    /* Anime waifu coding background — switches by time of day */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-image: var(--time-bg, url('/bg/noon.png'));
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      transition: background-image 0.8s ease, opacity 0.8s ease;
+    }
+    /* Dark overlay so UI text tetap kebaca di atas background */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(180deg, rgba(10,14,26,0.78) 0%, rgba(10,14,26,0.88) 100%);
+      pointer-events: none;
+    }
+    body.tod-morning { --time-bg: url('/bg/morning.png'); }
+    body.tod-noon    { --time-bg: url('/bg/noon.png'); }
+    body.tod-evening { --time-bg: url('/bg/evening.png'); }
+    body.tod-night   { --time-bg: url('/bg/night.png'); }
+    @media (max-width: 768px) {
+      body::before { background-position: center top; }
     }
 
     /* ─── NAVBAR ─── */
     .navbar {
       position: sticky; top: 0; z-index: 200;
-      background: #0a0e1a;
+      background: rgba(10,14,26,0.92);
       border-bottom: 1px solid var(--border);
       padding: 0 20px;
       height: 60px;
@@ -1906,6 +1935,31 @@
   }, { passive: true });
   // Panggil sekali saat load supaya state awal benar
   updateFAB();
+
+  // ─── TIME-OF-DAY BACKGROUND ───────────────────────────────────────────────
+  // Pagi 05-10, Siang 10-15, Sore 15-18, Malam 18-05
+  function getTimeOfDay() {
+    const h = new Date().getHours();
+    if (h >= 5  && h < 10) return 'morning';
+    if (h >= 10 && h < 15) return 'noon';
+    if (h >= 15 && h < 18) return 'evening';
+    return 'night';
+  }
+  function applyTimeOfDay() {
+    const tod = getTimeOfDay();
+    const cls = 'tod-' + tod;
+    if (!document.body.classList.contains(cls)) {
+      document.body.classList.remove('tod-morning','tod-noon','tod-evening','tod-night');
+      document.body.classList.add(cls);
+    }
+  }
+  applyTimeOfDay();
+  // Cek tiap menit, ganti otomatis kalau jam berubah ke fase berikutnya
+  setInterval(applyTimeOfDay, 60 * 1000);
+  // Preload semua background biar transisi smooth
+  ['morning','noon','evening','night'].forEach(t => {
+    const img = new Image(); img.src = '/bg/' + t + '.png';
+  });
 
   // ─── QR CODE ──────────────────────────────────────────────────────────────
   function showQR() {
