@@ -481,6 +481,41 @@
     .server-detail-value { color: var(--text); font-weight: 600; font-family: monospace; font-size: 0.8rem; }
 
     /* ─── HOW IT WORKS / CARA PAKAI ─── */
+    /* ─── HIW SPOILER (bottom of page) ─── */
+    .hiw-section { padding: 28px 20px 8px; }
+    .hiw-wrap { max-width: 980px; margin: 0 auto; }
+    .hiw-spoiler {
+      width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 14px;
+      padding: 16px 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text); cursor: pointer;
+      font-family: inherit; font-size: 0.95rem; font-weight: 700;
+      transition: all 0.25s;
+    }
+    .hiw-spoiler:hover {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(61,139,255,0.06), rgba(108,99,255,0.04));
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(61,139,255,0.12);
+    }
+    .hiw-spoiler-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .hiw-spoiler-left > i { color: var(--accent); font-size: 1.05rem; }
+    .hiw-spoiler-right { display: flex; align-items: center; gap: 10px; color: var(--text3); font-size: 0.78rem; font-weight: 500; }
+    .hiw-spoiler-hint { display: none; }
+    @media (min-width: 600px) { .hiw-spoiler-hint { display: inline; } }
+    .hiw-chevron {
+      width: 28px; height: 28px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--accent); font-size: 0.75rem;
+      transition: transform 0.3s ease, background 0.2s;
+    }
+    .hiw-spoiler[aria-expanded="true"] .hiw-chevron { transform: rotate(180deg); background: var(--accent-glow); }
     .hiw-card { overflow: hidden; }
     .hiw-header { cursor: default; }
     .hiw-badge {
@@ -501,12 +536,13 @@
     .hiw-toggle i { transition: transform 0.3s; }
     .hiw-toggle[aria-expanded="false"] i { transform: rotate(180deg); }
     .hiw-body {
-      max-height: 1500px; opacity: 1;
-      transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+      max-height: 2400px; opacity: 1;
+      margin-top: 14px;
+      transition: max-height 0.45s ease, opacity 0.3s ease, margin-top 0.3s ease, padding 0.3s ease;
       overflow: hidden;
     }
     .hiw-body.collapsed {
-      max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0;
+      max-height: 0; opacity: 0; margin-top: 0; padding-top: 0; padding-bottom: 0;
     }
     .hiw-steps {
       display: flex; flex-direction: column; gap: 10px;
@@ -1429,82 +1465,6 @@
           </div>
         </div>
 
-        <!-- How it works -->
-        <div class="card hiw-card">
-          <div class="card-header hiw-header">
-            <div class="card-title">
-              <i class="fa-solid fa-book-open"></i> Cara Pakai
-              <span class="hiw-badge">6 Langkah</span>
-            </div>
-            <button class="hiw-toggle" onclick="toggleHiw(this)" aria-expanded="true" title="Collapse">
-              <i class="fa-solid fa-chevron-up"></i>
-            </button>
-          </div>
-          <div class="card-body hiw-body">
-            <div class="hiw-steps">
-              <div class="hiw-step" style="--step-color:#3d8bff;--step-glow:rgba(61,139,255,0.18);">
-                <div class="hiw-icon"><i class="fa-solid fa-bolt"></i></div>
-                <div class="hiw-content">
-                  <div class="hiw-title">Email Otomatis Dibuat</div>
-                  <div class="hiw-desc">Begitu halaman dibuka, kamu langsung dapat alamat email unik. Tanpa daftar, tanpa form, tanpa repot.</div>
-                </div>
-                <div class="hiw-num">01</div>
-              </div>
-
-              <div class="hiw-step" style="--step-color:#22c55e;--step-glow:rgba(34,197,94,0.18);">
-                <div class="hiw-icon"><i class="fa-solid fa-copy"></i></div>
-                <div class="hiw-content">
-                  <div class="hiw-title">Salin Alamat Email</div>
-                  <div class="hiw-desc">Klik tombol <strong>Copy</strong> untuk menyalin email, lalu pakai untuk daftar website, terima OTP, atau verifikasi akun.</div>
-                </div>
-                <div class="hiw-num">02</div>
-              </div>
-
-              <div class="hiw-step" style="--step-color:#a855f7;--step-glow:rgba(168,85,247,0.18);">
-                <div class="hiw-icon"><i class="fa-solid fa-inbox"></i></div>
-                <div class="hiw-content">
-                  <div class="hiw-title">Inbox Real-Time</div>
-                  <div class="hiw-desc">Email masuk muncul otomatis tiap <strong>5 detik</strong>. Tidak perlu refresh manual, semua live.</div>
-                </div>
-                <div class="hiw-num">03</div>
-              </div>
-
-              <div class="hiw-step" style="--step-color:#f59e0b;--step-glow:rgba(245,158,11,0.18);">
-                <div class="hiw-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
-                <div class="hiw-content">
-                  <div class="hiw-title">Klik untuk Baca</div>
-                  <div class="hiw-desc">Tap pesan di inbox untuk lihat isi lengkap, ambil kode OTP, link verifikasi, atau lampiran.</div>
-                </div>
-                <div class="hiw-num">04</div>
-              </div>
-
-              <div class="hiw-step" style="--step-color:#06b6d4;--step-glow:rgba(6,182,212,0.18);">
-                <div class="hiw-icon"><i class="fa-solid fa-shuffle"></i></div>
-                <div class="hiw-content">
-                  <div class="hiw-title">Ganti / Hapus Kapan Saja</div>
-                  <div class="hiw-desc">Pakai tombol <strong>Change</strong> untuk pilih nama & domain custom, atau <strong>Delete</strong> untuk dapat email baru instan.</div>
-                </div>
-                <div class="hiw-num">05</div>
-              </div>
-
-              <div class="hiw-step" style="--step-color:#ef4444;--step-glow:rgba(239,68,68,0.18);">
-                <div class="hiw-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                <div class="hiw-content">
-                  <div class="hiw-title">Privasi Aman</div>
-                  <div class="hiw-desc">Email otomatis hilang setelah session berakhir. <strong>Tanpa jejak, tanpa data tersimpan</strong> di akun pribadi kamu.</div>
-                </div>
-                <div class="hiw-num">06</div>
-              </div>
-            </div>
-
-            <div class="hiw-footer">
-              <i class="fa-solid fa-lightbulb"></i>
-              <span>Tips: Klik ikon <i class="fa-solid fa-qrcode"></i> <strong>QR</strong> untuk share email lewat scan QR code.</span>
-            </div>
-          </div>
-        </div>
-
-
       </div>
 
       <!-- RIGHT: INBOX + VIEWER -->
@@ -1919,6 +1879,79 @@
   </div>
 </div>
 
+<!-- CARA PAKAI (collapsed by default) -->
+<section class="hiw-section">
+  <div class="hiw-wrap">
+    <button class="hiw-spoiler" onclick="toggleHiw(this)" aria-expanded="false">
+      <span class="hiw-spoiler-left">
+        <i class="fa-solid fa-book-open"></i>
+        <span>Cara Pakai</span>
+        <span class="hiw-badge">6 Langkah</span>
+      </span>
+      <span class="hiw-spoiler-right">
+        <span class="hiw-spoiler-hint">Klik untuk lihat</span>
+        <i class="fa-solid fa-chevron-down hiw-chevron"></i>
+      </span>
+    </button>
+    <div class="hiw-body collapsed">
+      <div class="hiw-steps">
+        <div class="hiw-step" style="--step-color:#3d8bff;--step-glow:rgba(61,139,255,0.18);">
+          <div class="hiw-icon"><i class="fa-solid fa-bolt"></i></div>
+          <div class="hiw-content">
+            <div class="hiw-title">Email Otomatis Dibuat</div>
+            <div class="hiw-desc">Begitu halaman dibuka, kamu langsung dapat alamat email unik. Tanpa daftar, tanpa form, tanpa repot.</div>
+          </div>
+          <div class="hiw-num">01</div>
+        </div>
+        <div class="hiw-step" style="--step-color:#22c55e;--step-glow:rgba(34,197,94,0.18);">
+          <div class="hiw-icon"><i class="fa-solid fa-copy"></i></div>
+          <div class="hiw-content">
+            <div class="hiw-title">Salin Alamat Email</div>
+            <div class="hiw-desc">Klik tombol <strong>Copy</strong> untuk menyalin email, lalu pakai untuk daftar website, terima OTP, atau verifikasi akun.</div>
+          </div>
+          <div class="hiw-num">02</div>
+        </div>
+        <div class="hiw-step" style="--step-color:#a855f7;--step-glow:rgba(168,85,247,0.18);">
+          <div class="hiw-icon"><i class="fa-solid fa-inbox"></i></div>
+          <div class="hiw-content">
+            <div class="hiw-title">Inbox Real-Time</div>
+            <div class="hiw-desc">Email masuk muncul otomatis tiap <strong>5 detik</strong>. Tidak perlu refresh manual, semua live.</div>
+          </div>
+          <div class="hiw-num">03</div>
+        </div>
+        <div class="hiw-step" style="--step-color:#f59e0b;--step-glow:rgba(245,158,11,0.18);">
+          <div class="hiw-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+          <div class="hiw-content">
+            <div class="hiw-title">Klik untuk Baca</div>
+            <div class="hiw-desc">Tap pesan di inbox untuk lihat isi lengkap, ambil kode OTP, link verifikasi, atau lampiran.</div>
+          </div>
+          <div class="hiw-num">04</div>
+        </div>
+        <div class="hiw-step" style="--step-color:#06b6d4;--step-glow:rgba(6,182,212,0.18);">
+          <div class="hiw-icon"><i class="fa-solid fa-shuffle"></i></div>
+          <div class="hiw-content">
+            <div class="hiw-title">Ganti / Hapus Kapan Saja</div>
+            <div class="hiw-desc">Pakai tombol <strong>Change</strong> untuk pilih nama & domain custom, atau <strong>Delete</strong> untuk dapat email baru instan.</div>
+          </div>
+          <div class="hiw-num">05</div>
+        </div>
+        <div class="hiw-step" style="--step-color:#ef4444;--step-glow:rgba(239,68,68,0.18);">
+          <div class="hiw-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="hiw-content">
+            <div class="hiw-title">Privasi Aman</div>
+            <div class="hiw-desc">Email otomatis hilang setelah session berakhir. <strong>Tanpa jejak, tanpa data tersimpan</strong> di akun pribadi kamu.</div>
+          </div>
+          <div class="hiw-num">06</div>
+        </div>
+      </div>
+      <div class="hiw-footer">
+        <i class="fa-solid fa-lightbulb"></i>
+        <span>Tips: Klik ikon <i class="fa-solid fa-qrcode"></i> <strong>QR</strong> untuk share email lewat scan QR code.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-inner">
@@ -2216,11 +2249,14 @@
 
   // ─── HOW IT WORKS toggle ──────────────────────────────────────────────────
   function toggleHiw(btn) {
-    const body = btn.closest('.hiw-card').querySelector('.hiw-body');
+    const wrap = btn.closest('.hiw-wrap, .hiw-card');
+    const body = wrap ? wrap.querySelector('.hiw-body') : null;
+    if (!body) return;
     const expanded = btn.getAttribute('aria-expanded') === 'true';
     btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-    btn.title = expanded ? 'Expand' : 'Collapse';
     body.classList.toggle('collapsed', expanded);
+    const hint = btn.querySelector('.hiw-spoiler-hint');
+    if (hint) hint.textContent = expanded ? 'Klik untuk lihat' : 'Klik untuk tutup';
   }
 
   // ─── TIME-OF-DAY BACKGROUND ───────────────────────────────────────────────
