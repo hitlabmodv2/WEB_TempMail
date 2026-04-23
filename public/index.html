@@ -480,6 +480,91 @@
     .server-detail-label i { color: var(--accent); width: 14px; text-align: center; }
     .server-detail-value { color: var(--text); font-weight: 600; font-family: monospace; font-size: 0.8rem; }
 
+    /* ─── HOW IT WORKS / CARA PAKAI ─── */
+    .hiw-card { overflow: hidden; }
+    .hiw-header { cursor: default; }
+    .hiw-badge {
+      font-size: 0.62rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 50px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; margin-left: 8px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .hiw-toggle {
+      background: var(--card2); border: 1px solid var(--border);
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text2);
+      transition: all 0.2s;
+    }
+    .hiw-toggle:hover { color: var(--accent); border-color: var(--accent); }
+    .hiw-toggle i { transition: transform 0.3s; }
+    .hiw-toggle[aria-expanded="false"] i { transform: rotate(180deg); }
+    .hiw-body {
+      max-height: 1500px; opacity: 1;
+      transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+      overflow: hidden;
+    }
+    .hiw-body.collapsed {
+      max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0;
+    }
+    .hiw-steps {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .hiw-step {
+      position: relative;
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 14px 14px 14px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--step-color);
+      border-radius: var(--radius2);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .hiw-step:hover {
+      transform: translateX(2px);
+      box-shadow: 0 6px 20px var(--step-glow);
+      border-color: var(--step-color);
+    }
+    .hiw-icon {
+      width: 38px; height: 38px; flex-shrink: 0;
+      border-radius: 10px;
+      background: var(--step-glow);
+      border: 1px solid var(--step-color);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--step-color);
+      font-size: 0.95rem;
+    }
+    .hiw-content { flex: 1; min-width: 0; }
+    .hiw-title {
+      font-size: 0.88rem; font-weight: 700; color: var(--text);
+      margin-bottom: 4px; line-height: 1.3;
+    }
+    .hiw-desc {
+      font-size: 0.78rem; color: var(--text2);
+      line-height: 1.55;
+    }
+    .hiw-desc strong { color: var(--text); font-weight: 600; }
+    .hiw-num {
+      position: absolute; top: 10px; right: 12px;
+      font-size: 0.68rem; font-weight: 800;
+      color: var(--text3);
+      font-family: monospace;
+      letter-spacing: 1px;
+      opacity: 0.6;
+    }
+    .hiw-footer {
+      margin-top: 14px; padding: 11px 14px;
+      background: rgba(245,158,11,0.08);
+      border: 1px dashed rgba(245,158,11,0.35);
+      border-radius: var(--radius2);
+      font-size: 0.78rem; color: var(--text2);
+      display: flex; align-items: center; gap: 9px;
+      line-height: 1.5;
+    }
+    .hiw-footer > i:first-child { color: var(--yellow); font-size: 0.95rem; flex-shrink: 0; }
+    .hiw-footer strong { color: var(--text); font-weight: 600; }
+
     /* OS info grid — stacked label/value, wraps cleanly */
     .os-grid {
       display: grid;
@@ -1216,24 +1301,76 @@
         </div>
 
         <!-- How it works -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><i class="fa-solid fa-circle-info"></i> How It Works</div>
+        <div class="card hiw-card">
+          <div class="card-header hiw-header">
+            <div class="card-title">
+              <i class="fa-solid fa-book-open"></i> Cara Pakai
+              <span class="hiw-badge">6 Langkah</span>
+            </div>
+            <button class="hiw-toggle" onclick="toggleHiw(this)" aria-expanded="true" title="Collapse">
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
           </div>
-          <div class="card-body">
-            <div style="display:flex;flex-direction:column;gap:12px;">
-              <div style="display:flex;gap:12px;align-items:flex-start;">
-                <div style="width:26px;height:26px;border-radius:50%;background:rgba(61,139,255,0.15);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:700;color:var(--accent);flex-shrink:0;">1</div>
-                <div><div style="font-size:0.83rem;font-weight:600;margin-bottom:2px;">Auto-generated address</div><div style="font-size:0.76rem;color:var(--text2);">A unique email is created for you instantly on first load.</div></div>
+          <div class="card-body hiw-body">
+            <div class="hiw-steps">
+              <div class="hiw-step" style="--step-color:#3d8bff;--step-glow:rgba(61,139,255,0.18);">
+                <div class="hiw-icon"><i class="fa-solid fa-bolt"></i></div>
+                <div class="hiw-content">
+                  <div class="hiw-title">Email Otomatis Dibuat</div>
+                  <div class="hiw-desc">Begitu halaman dibuka, kamu langsung dapat alamat email unik. Tanpa daftar, tanpa form, tanpa repot.</div>
+                </div>
+                <div class="hiw-num">01</div>
               </div>
-              <div style="display:flex;gap:12px;align-items:flex-start;">
-                <div style="width:26px;height:26px;border-radius:50%;background:rgba(61,139,255,0.15);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:700;color:var(--accent);flex-shrink:0;">2</div>
-                <div><div style="font-size:0.83rem;font-weight:600;margin-bottom:2px;">Real-time inbox</div><div style="font-size:0.76rem;color:var(--text2);">Emails arrive automatically, refreshed every 5 seconds.</div></div>
+
+              <div class="hiw-step" style="--step-color:#22c55e;--step-glow:rgba(34,197,94,0.18);">
+                <div class="hiw-icon"><i class="fa-solid fa-copy"></i></div>
+                <div class="hiw-content">
+                  <div class="hiw-title">Salin Alamat Email</div>
+                  <div class="hiw-desc">Klik tombol <strong>Copy</strong> untuk menyalin email, lalu pakai untuk daftar website, terima OTP, atau verifikasi akun.</div>
+                </div>
+                <div class="hiw-num">02</div>
               </div>
-              <div style="display:flex;gap:12px;align-items:flex-start;">
-                <div style="width:26px;height:26px;border-radius:50%;background:rgba(61,139,255,0.15);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:700;color:var(--accent);flex-shrink:0;">3</div>
-                <div><div style="font-size:0.83rem;font-weight:600;margin-bottom:2px;">Click to read</div><div style="font-size:0.76rem;color:var(--text2);">Click any message in your inbox to view full content.</div></div>
+
+              <div class="hiw-step" style="--step-color:#a855f7;--step-glow:rgba(168,85,247,0.18);">
+                <div class="hiw-icon"><i class="fa-solid fa-inbox"></i></div>
+                <div class="hiw-content">
+                  <div class="hiw-title">Inbox Real-Time</div>
+                  <div class="hiw-desc">Email masuk muncul otomatis tiap <strong>5 detik</strong>. Tidak perlu refresh manual, semua live.</div>
+                </div>
+                <div class="hiw-num">03</div>
               </div>
+
+              <div class="hiw-step" style="--step-color:#f59e0b;--step-glow:rgba(245,158,11,0.18);">
+                <div class="hiw-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+                <div class="hiw-content">
+                  <div class="hiw-title">Klik untuk Baca</div>
+                  <div class="hiw-desc">Tap pesan di inbox untuk lihat isi lengkap, ambil kode OTP, link verifikasi, atau lampiran.</div>
+                </div>
+                <div class="hiw-num">04</div>
+              </div>
+
+              <div class="hiw-step" style="--step-color:#06b6d4;--step-glow:rgba(6,182,212,0.18);">
+                <div class="hiw-icon"><i class="fa-solid fa-shuffle"></i></div>
+                <div class="hiw-content">
+                  <div class="hiw-title">Ganti / Hapus Kapan Saja</div>
+                  <div class="hiw-desc">Pakai tombol <strong>Change</strong> untuk pilih nama & domain custom, atau <strong>Delete</strong> untuk dapat email baru instan.</div>
+                </div>
+                <div class="hiw-num">05</div>
+              </div>
+
+              <div class="hiw-step" style="--step-color:#ef4444;--step-glow:rgba(239,68,68,0.18);">
+                <div class="hiw-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="hiw-content">
+                  <div class="hiw-title">Privasi Aman</div>
+                  <div class="hiw-desc">Email otomatis hilang setelah session berakhir. <strong>Tanpa jejak, tanpa data tersimpan</strong> di akun pribadi kamu.</div>
+                </div>
+                <div class="hiw-num">06</div>
+              </div>
+            </div>
+
+            <div class="hiw-footer">
+              <i class="fa-solid fa-lightbulb"></i>
+              <span>Tips: Klik ikon <i class="fa-solid fa-qrcode"></i> <strong>QR</strong> untuk share email lewat scan QR code.</span>
             </div>
           </div>
         </div>
@@ -1750,6 +1887,15 @@
   }, { passive: true });
   // Panggil sekali saat load supaya state awal benar
   updateFAB();
+
+  // ─── HOW IT WORKS toggle ──────────────────────────────────────────────────
+  function toggleHiw(btn) {
+    const body = btn.closest('.hiw-card').querySelector('.hiw-body');
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+    btn.title = expanded ? 'Expand' : 'Collapse';
+    body.classList.toggle('collapsed', expanded);
+  }
 
   // ─── TIME-OF-DAY BACKGROUND ───────────────────────────────────────────────
   // Pagi 05-10, Siang 10-15, Sore 15-18, Malam 18-05
