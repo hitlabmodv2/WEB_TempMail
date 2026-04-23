@@ -547,10 +547,45 @@
     .hiw-steps {
       display: flex; flex-direction: column; gap: 10px;
     }
+    .hiw-step-head { display: flex; align-items: flex-start; gap: 14px; cursor: pointer; }
+    .hiw-step-chev {
+      flex-shrink: 0;
+      color: var(--step-color, var(--accent));
+      font-size: 0.75rem;
+      width: 26px; height: 26px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 50%;
+      transition: transform 0.3s ease, background 0.2s;
+      align-self: center;
+    }
+    .hiw-step.open .hiw-step-chev { transform: rotate(180deg); background: var(--step-glow, var(--accent-glow)); }
+    .hiw-step-detail {
+      max-height: 0; opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease, padding 0.3s ease;
+      font-size: 0.82rem; color: var(--text2); line-height: 1.65;
+      border-top: 1px dashed transparent;
+      margin-top: 0; padding-top: 0;
+    }
+    .hiw-step.open .hiw-step-detail {
+      max-height: 800px; opacity: 1;
+      margin-top: 12px; padding-top: 12px;
+      border-top-color: var(--border);
+    }
+    .hiw-step-detail p { margin-bottom: 8px; }
+    .hiw-step-detail ul { margin: 6px 0 8px 18px; }
+    .hiw-step-detail li { margin-bottom: 4px; }
+    .hiw-step-detail strong { color: var(--text); font-weight: 600; }
+    .hiw-step-detail code {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 1px 6px; border-radius: 4px;
+      font-size: 0.78rem; color: var(--step-color, var(--accent));
+    }
     .hiw-step {
       position: relative;
-      display: flex; align-items: flex-start; gap: 14px;
-      padding: 14px 14px 14px 14px;
+      display: flex; flex-direction: column;
+      padding: 14px;
       background: var(--card2);
       border: 1px solid var(--border);
       border-left: 3px solid var(--step-color);
@@ -1894,54 +1929,133 @@
       </span>
     </button>
     <div class="hiw-body collapsed">
-      <div class="hiw-steps">
-        <div class="hiw-step" style="--step-color:#3d8bff;--step-glow:rgba(61,139,255,0.18);">
-          <div class="hiw-icon"><i class="fa-solid fa-bolt"></i></div>
-          <div class="hiw-content">
-            <div class="hiw-title">Email Otomatis Dibuat</div>
-            <div class="hiw-desc">Begitu halaman dibuka, kamu langsung dapat alamat email unik. Tanpa daftar, tanpa form, tanpa repot.</div>
+      <div class="hiw-steps" data-accordion="true">
+        <div class="hiw-step" style="--step-color:#3d8bff;--step-glow:rgba(61,139,255,0.18);" onclick="toggleStep(this)">
+          <div class="hiw-step-head">
+            <div class="hiw-icon"><i class="fa-solid fa-bolt"></i></div>
+            <div class="hiw-content">
+              <div class="hiw-title">Email Otomatis Dibuat</div>
+              <div class="hiw-desc">Begitu halaman dibuka, kamu langsung dapat alamat email unik. Tanpa daftar, tanpa form, tanpa repot.</div>
+            </div>
+            <div class="hiw-num">01</div>
+            <i class="fa-solid fa-chevron-down hiw-step-chev"></i>
           </div>
-          <div class="hiw-num">01</div>
+          <div class="hiw-step-detail">
+            <p>Saat kamu pertama kali membuka NovaMail, sistem otomatis menjalankan <strong>scraper</strong> ke server upstream untuk meminta alamat email baru yang belum dipakai siapapun.</p>
+            <ul>
+              <li><strong>Tanpa registrasi</strong> — tidak perlu nama, password, atau verifikasi telepon.</li>
+              <li><strong>Unik per session</strong> — alamat dibuat khusus untuk browser/tab kamu.</li>
+              <li><strong>Siap dalam &lt; 2 detik</strong> — langsung muncul di kartu "Your Email Address".</li>
+            </ul>
+            <p>💡 Notifikasi hijau "<em>Email address generated!</em>" muncul di pojok kanan atas sebagai konfirmasi.</p>
+          </div>
         </div>
-        <div class="hiw-step" style="--step-color:#22c55e;--step-glow:rgba(34,197,94,0.18);">
-          <div class="hiw-icon"><i class="fa-solid fa-copy"></i></div>
-          <div class="hiw-content">
-            <div class="hiw-title">Salin Alamat Email</div>
-            <div class="hiw-desc">Klik tombol <strong>Copy</strong> untuk menyalin email, lalu pakai untuk daftar website, terima OTP, atau verifikasi akun.</div>
+
+        <div class="hiw-step" style="--step-color:#22c55e;--step-glow:rgba(34,197,94,0.18);" onclick="toggleStep(this)">
+          <div class="hiw-step-head">
+            <div class="hiw-icon"><i class="fa-solid fa-copy"></i></div>
+            <div class="hiw-content">
+              <div class="hiw-title">Salin Alamat Email</div>
+              <div class="hiw-desc">Klik tombol <strong>Copy</strong> untuk menyalin email, lalu pakai untuk daftar website, terima OTP, atau verifikasi akun.</div>
+            </div>
+            <div class="hiw-num">02</div>
+            <i class="fa-solid fa-chevron-down hiw-step-chev"></i>
           </div>
-          <div class="hiw-num">02</div>
+          <div class="hiw-step-detail">
+            <p>Ada <strong>3 cara</strong> menyalin email:</p>
+            <ul>
+              <li>🔘 Tap tombol <strong>Copy</strong> biru di samping alamat email.</li>
+              <li>🔘 Klik kotak alamat email — otomatis tersalin ke clipboard.</li>
+              <li>🔘 Pakai tombol <strong>QR</strong> dan scan kode lewat HP lain.</li>
+            </ul>
+            <p>Toast hijau "Tersalin!" akan muncul sebagai konfirmasi. Cocok untuk daftar Netflix, Spotify, Telegram, Discord, dan ratusan layanan lain.</p>
+          </div>
         </div>
-        <div class="hiw-step" style="--step-color:#a855f7;--step-glow:rgba(168,85,247,0.18);">
-          <div class="hiw-icon"><i class="fa-solid fa-inbox"></i></div>
-          <div class="hiw-content">
-            <div class="hiw-title">Inbox Real-Time</div>
-            <div class="hiw-desc">Email masuk muncul otomatis tiap <strong>5 detik</strong>. Tidak perlu refresh manual, semua live.</div>
+
+        <div class="hiw-step" style="--step-color:#a855f7;--step-glow:rgba(168,85,247,0.18);" onclick="toggleStep(this)">
+          <div class="hiw-step-head">
+            <div class="hiw-icon"><i class="fa-solid fa-inbox"></i></div>
+            <div class="hiw-content">
+              <div class="hiw-title">Inbox Real-Time</div>
+              <div class="hiw-desc">Email masuk muncul otomatis tiap <strong>5 detik</strong>. Tidak perlu refresh manual, semua live.</div>
+            </div>
+            <div class="hiw-num">03</div>
+            <i class="fa-solid fa-chevron-down hiw-step-chev"></i>
           </div>
-          <div class="hiw-num">03</div>
+          <div class="hiw-step-detail">
+            <p>NovaMail melakukan <strong>auto-polling</strong> ke server inbox setiap 5 detik untuk memeriksa pesan baru.</p>
+            <ul>
+              <li>🔔 <strong>Notifikasi suara</strong> berbunyi saat email baru masuk (bisa di-mute).</li>
+              <li>🟢 Indikator "<em>Inbox synced — N message(s)</em>" hijau menandakan koneksi aktif.</li>
+              <li>🔄 Tombol <strong>Refresh</strong> manual tetap tersedia kalau buru-buru.</li>
+            </ul>
+            <p>Karena polling berbasis browser, inbox akan tetap update selama tab dibuka.</p>
+          </div>
         </div>
-        <div class="hiw-step" style="--step-color:#f59e0b;--step-glow:rgba(245,158,11,0.18);">
-          <div class="hiw-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
-          <div class="hiw-content">
-            <div class="hiw-title">Klik untuk Baca</div>
-            <div class="hiw-desc">Tap pesan di inbox untuk lihat isi lengkap, ambil kode OTP, link verifikasi, atau lampiran.</div>
+
+        <div class="hiw-step" style="--step-color:#f59e0b;--step-glow:rgba(245,158,11,0.18);" onclick="toggleStep(this)">
+          <div class="hiw-step-head">
+            <div class="hiw-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+            <div class="hiw-content">
+              <div class="hiw-title">Klik untuk Baca</div>
+              <div class="hiw-desc">Tap pesan di inbox untuk lihat isi lengkap, ambil kode OTP, link verifikasi, atau lampiran.</div>
+            </div>
+            <div class="hiw-num">04</div>
+            <i class="fa-solid fa-chevron-down hiw-step-chev"></i>
           </div>
-          <div class="hiw-num">04</div>
+          <div class="hiw-step-detail">
+            <p>Setelah klik salah satu pesan, viewer akan menampilkan:</p>
+            <ul>
+              <li>📨 <strong>Subjek, pengirim, & timestamp</strong> di bagian header.</li>
+              <li>📄 <strong>Isi HTML email</strong> dengan render rapi (gambar, tombol, link).</li>
+              <li>🔢 <strong>Kode OTP</strong> otomatis ter-highlight & bisa dicopy 1-klik.</li>
+              <li>📎 <strong>Lampiran</strong> bisa diunduh langsung dari viewer.</li>
+            </ul>
+            <p>Aman dibuka — semua link external dibuka di tab baru dengan <code>rel="noopener"</code>.</p>
+          </div>
         </div>
-        <div class="hiw-step" style="--step-color:#06b6d4;--step-glow:rgba(6,182,212,0.18);">
-          <div class="hiw-icon"><i class="fa-solid fa-shuffle"></i></div>
-          <div class="hiw-content">
-            <div class="hiw-title">Ganti / Hapus Kapan Saja</div>
-            <div class="hiw-desc">Pakai tombol <strong>Change</strong> untuk pilih nama & domain custom, atau <strong>Delete</strong> untuk dapat email baru instan.</div>
+
+        <div class="hiw-step" style="--step-color:#06b6d4;--step-glow:rgba(6,182,212,0.18);" onclick="toggleStep(this)">
+          <div class="hiw-step-head">
+            <div class="hiw-icon"><i class="fa-solid fa-shuffle"></i></div>
+            <div class="hiw-content">
+              <div class="hiw-title">Ganti / Hapus Kapan Saja</div>
+              <div class="hiw-desc">Pakai tombol <strong>Change</strong> untuk pilih nama & domain custom, atau <strong>Delete</strong> untuk dapat email baru instan.</div>
+            </div>
+            <div class="hiw-num">05</div>
+            <i class="fa-solid fa-chevron-down hiw-step-chev"></i>
           </div>
-          <div class="hiw-num">05</div>
+          <div class="hiw-step-detail">
+            <p>Kontrol penuh atas alamat email kamu:</p>
+            <ul>
+              <li>✏️ <strong>Change</strong> — input nama custom (misal: <code>akusayang@</code>) + pilih dari 3 domain (<code>t.etokom.com</code>, <code>us.seebestdeals.com</code>, <code>gift4zone.top</code>).</li>
+              <li>🗑️ <strong>Delete</strong> — hapus email lama, otomatis dapet email random baru.</li>
+              <li>🔁 <strong>Refresh</strong> — paksa sinkron ulang inbox.</li>
+            </ul>
+            <p>Tidak ada batas berapa kali kamu boleh ganti — gratis selamanya.</p>
+          </div>
         </div>
-        <div class="hiw-step" style="--step-color:#ef4444;--step-glow:rgba(239,68,68,0.18);">
-          <div class="hiw-icon"><i class="fa-solid fa-shield-halved"></i></div>
-          <div class="hiw-content">
-            <div class="hiw-title">Privasi Aman</div>
-            <div class="hiw-desc">Email otomatis hilang setelah session berakhir. <strong>Tanpa jejak, tanpa data tersimpan</strong> di akun pribadi kamu.</div>
+
+        <div class="hiw-step" style="--step-color:#ef4444;--step-glow:rgba(239,68,68,0.18);" onclick="toggleStep(this)">
+          <div class="hiw-step-head">
+            <div class="hiw-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="hiw-content">
+              <div class="hiw-title">Privasi Aman</div>
+              <div class="hiw-desc">Email otomatis hilang setelah session berakhir. <strong>Tanpa jejak, tanpa data tersimpan</strong> di akun pribadi kamu.</div>
+            </div>
+            <div class="hiw-num">06</div>
+            <i class="fa-solid fa-chevron-down hiw-step-chev"></i>
           </div>
-          <div class="hiw-num">06</div>
+          <div class="hiw-step-detail">
+            <p>Privasi adalah inti NovaMail:</p>
+            <ul>
+              <li>🔒 <strong>Tanpa akun</strong> — tidak ada data identitas yang disimpan.</li>
+              <li>🍪 <strong>1 cookie session</strong> — otomatis kadaluarsa setelah 24 jam.</li>
+              <li>🚫 <strong>Tanpa tracking</strong> — tidak ada Google Analytics, Facebook Pixel, atau iklan tertarget.</li>
+              <li>💨 <strong>Auto-cleanup</strong> — tutup tab = semua data hilang.</li>
+            </ul>
+            <p>Cocok untuk verifikasi sekali pakai tanpa khawatir spam masuk ke email asli kamu.</p>
+          </div>
         </div>
       </div>
       <div class="hiw-footer">
@@ -2248,6 +2362,16 @@
   });
 
   // ─── HOW IT WORKS toggle ──────────────────────────────────────────────────
+  function toggleStep(stepEl) {
+    const isOpen = stepEl.classList.contains('open');
+    const parent = stepEl.parentElement;
+    if (parent && parent.dataset.accordion === 'true') {
+      parent.querySelectorAll('.hiw-step.open').forEach(el => {
+        if (el !== stepEl) el.classList.remove('open');
+      });
+    }
+    stepEl.classList.toggle('open', !isOpen);
+  }
   function toggleHiw(btn) {
     const wrap = btn.closest('.hiw-wrap, .hiw-card');
     const body = wrap ? wrap.querySelector('.hiw-body') : null;
