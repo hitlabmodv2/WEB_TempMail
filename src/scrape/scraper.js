@@ -167,15 +167,43 @@ class TMailScraper {
       let from = '';
       let body = '';
       let date = '';
+      const html = res.data;
 
-      const subjectMatch = res.data.match(/class="mail-view-header-subject"[^>]*>([^<]+)</);
-      if (subjectMatch) subject = subjectMatch[1].trim();
+      // ── Subject: coba berbagai pola HTML yang mungkin ──
+      const subjPatterns = [
+        /class="[^"]*mail-view-header-subject[^"]*"[^>]*>([\s\S]*?)<\/[a-z]+>/i,
+        /class="[^"]*subject[^"]*"[^>]*>([\s\S]*?)<\/[a-z]+>/i,
+        /"subject"\s*:\s*"([^"]+)"/,
+        /data-subject="([^"]+)"/i,
+      ];
+      for (const p of subjPatterns) {
+        const m = html.match(p);
+        if (m) { const v = m[1].replace(/<[^>]+>/g,'').trim(); if (v) { subject = v; break; } }
+      }
 
-      const fromMatch = res.data.match(/class="mail-view-header-from"[^>]*>[\s\S]*?<span[^>]*>([^<]+)</);
-      if (fromMatch) from = fromMatch[1].trim();
+      // ── From: coba berbagai pola ──
+      const fromPatterns = [
+        /class="[^"]*mail-view-header-from[^"]*"[^>]*>[\s\S]*?<span[^>]*>([\s\S]*?)<\/span>/i,
+        /class="[^"]*from[^"]*"[^>]*>[\s\S]*?<span[^>]*>([\s\S]*?)<\/span>/i,
+        /"from_name"\s*:\s*"([^"]+)"/,
+        /"from"\s*:\s*"([^"]+)"/,
+        /data-from="([^"]+)"/i,
+      ];
+      for (const p of fromPatterns) {
+        const m = html.match(p);
+        if (m) { const v = m[1].replace(/<[^>]+>/g,'').trim(); if (v) { from = v; break; } }
+      }
 
-      const dateMatch = res.data.match(/class="mail-view-header-date"[^>]*>[\s\S]*?<span[^>]*>([^<]+)</);
-      if (dateMatch) date = dateMatch[1].trim();
+      // ── Date ──
+      const datePatterns = [
+        /class="[^"]*mail-view-header-date[^"]*"[^>]*>[\s\S]*?<span[^>]*>([\s\S]*?)<\/span>/i,
+        /class="[^"]*date[^"]*"[^>]*>[\s\S]*?<span[^>]*>([\s\S]*?)<\/span>/i,
+        /"created_at"\s*:\s*"([^"]+)"/,
+      ];
+      for (const p of datePatterns) {
+        const m = html.match(p);
+        if (m) { const v = m[1].replace(/<[^>]+>/g,'').trim(); if (v) { date = v; break; } }
+      }
 
       if (bodyMatch) {
         const iframeUrl = bodyMatch[1];

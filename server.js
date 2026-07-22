@@ -2,10 +2,27 @@ const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const TMailScraper = require('./src/scrape/scraper');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// ── Persistent web start time (survives process restarts) ──────────────────
+const START_TIME_FILE = path.join(__dirname, '.web_start_time');
+let webStartTime;
+try {
+  if (fs.existsSync(START_TIME_FILE)) {
+    const stored = parseInt(fs.readFileSync(START_TIME_FILE, 'utf8').trim(), 10);
+    if (stored && !isNaN(stored)) {
+      webStartTime = stored;
+    }
+  }
+} catch (_) {}
+if (!webStartTime) {
+  webStartTime = Date.now();
+  try { fs.writeFileSync(START_TIME_FILE, String(webStartTime)); } catch (_) {}
+}
 
 app.use(cors());
 app.use(express.json());
@@ -144,6 +161,7 @@ app.get('/api/server-info', (req, res) => {
       npmVersion: process.versions.node,
       osUptime: fmt(sysUptime),
     },
+    webUptime: fmt(Math.floor((Date.now() - webStartTime) / 1000)),
     memory: {
       totalRaw: totalMem,
       freeRaw: freeMem,

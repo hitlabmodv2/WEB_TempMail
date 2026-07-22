@@ -1,0 +1,11 @@
+# Konfigurasi Auto PR — push.sh
+# Dibuat/diupdate via wizard interaktif. Bisa diedit manual kapan saja.
+
+# Aktifkan/matikan auto PR: true / false
+enabled=true
+
+# Branch tujuan PR (base). "auto" = pakai DEFAULT_BRANCH script
+base=auto
+
+# Buat PR sebagai draft: true / false
+draft=false
