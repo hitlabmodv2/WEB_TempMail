@@ -888,6 +888,48 @@
     .social-val { font-size: 0.78rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .social-arrow { margin-left: auto; color: var(--text3); font-size: 0.7rem; position: relative; z-index: 1; flex-shrink: 0; }
 
+    /* ── Social Spoiler accordion ── */
+    .social-list { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
+    .social-item { border-radius: var(--radius2); border: 1px solid var(--border); background: var(--bg2); overflow: hidden; transition: border-color 0.22s; }
+    .social-item.wa.open { border-color: rgba(37,211,102,0.45); }
+    .social-item.tg.open { border-color: rgba(36,161,222,0.45); }
+    .social-item.fb.open { border-color: rgba(24,119,242,0.45); }
+    .social-item.yt.open { border-color: rgba(255,68,68,0.45); }
+    .social-trigger {
+      width: 100%; display: flex; align-items: center; gap: 12px;
+      padding: 13px 14px; background: none; border: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; color: var(--text); text-align: left;
+      transition: background 0.18s;
+    }
+    .social-trigger:hover { background: rgba(255,255,255,0.03); }
+    .social-trigger-info { flex: 1; min-width: 0; }
+    .social-trigger-sub { font-size: 0.63rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 2px; }
+    .social-trigger-name { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+    .social-trigger-chevron { color: var(--text3); font-size: 0.75rem; flex-shrink: 0; transition: transform 0.28s; }
+    .social-item.open .social-trigger-chevron { transform: rotate(180deg); }
+    .social-reveal { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .social-item.open .social-reveal { max-height: 120px; }
+    .social-reveal-inner {
+      padding: 2px 14px 14px;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .social-reveal-id {
+      font-family: monospace; font-size: 0.78rem; color: var(--text2);
+      background: var(--bg); border: 1px solid var(--border);
+      padding: 7px 12px; border-radius: 8px; flex: 1; min-width: 0; word-break: break-all;
+    }
+    .social-visit-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: var(--radius2);
+      font-size: 0.78rem; font-weight: 700; text-decoration: none; color: #fff;
+      white-space: nowrap; flex-shrink: 0; transition: opacity 0.18s;
+    }
+    .social-visit-btn:hover { opacity: 0.82; }
+    .social-item.wa .social-visit-btn { background: #25d366; }
+    .social-item.tg .social-visit-btn { background: #24a1de; }
+    .social-item.fb .social-visit-btn { background: #1877f2; }
+    .social-item.yt .social-visit-btn { background: #ff4444; }
+
     /* WA Channel cards */
     .chan-item {
       display: flex; align-items: center; gap: 12px;
@@ -1820,43 +1862,88 @@
         <span class="tech-chip"><i class="fa-solid fa-database" style="color:var(--cyan);"></i>MongoDB</span>
       </div>
 
-      <!-- Social Links Grid -->
-      <div class="social-grid">
-        <a class="social-card wa" href="https://wa.me/6289688206739" target="_blank">
-          <div class="social-icon wa"><i class="fa-brands fa-whatsapp"></i></div>
-          <div class="social-info">
-            <div class="social-lbl">WhatsApp</div>
-            <div class="social-val">089-688-206-739</div>
-          </div>
-          <i class="fa-solid fa-arrow-up-right-from-square social-arrow"></i>
-        </a>
+      <!-- Social Links — Accordion -->
+      <div class="social-list">
 
-        <a class="social-card tg" href="https://t.me/Wilykun1994" target="_blank">
-          <div class="social-icon tg"><i class="fa-brands fa-telegram"></i></div>
-          <div class="social-info">
-            <div class="social-lbl">Telegram</div>
-            <div class="social-val">@Wilykun1994</div>
+        <!-- WhatsApp -->
+        <div class="social-item wa">
+          <button class="social-trigger" onclick="toggleSocialItem(this)">
+            <div class="social-icon wa"><i class="fa-brands fa-whatsapp"></i></div>
+            <div class="social-trigger-info">
+              <div class="social-trigger-sub">Social Media</div>
+              <div class="social-trigger-name">My WhatsApp</div>
+            </div>
+            <i class="fa-solid fa-chevron-down social-trigger-chevron"></i>
+          </button>
+          <div class="social-reveal">
+            <div class="social-reveal-inner">
+              <div class="social-reveal-id">089-688-206-739</div>
+              <a class="social-visit-btn" href="https://wa.me/6289688206739" target="_blank">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
+              </a>
+            </div>
           </div>
-          <i class="fa-solid fa-arrow-up-right-from-square social-arrow"></i>
-        </a>
+        </div>
 
-        <a class="social-card fb" href="https://www.facebook.com/wily.kun.1" target="_blank">
-          <div class="social-icon fb"><i class="fa-brands fa-facebook"></i></div>
-          <div class="social-info">
-            <div class="social-lbl">Facebook</div>
-            <div class="social-val">wily.kun.1</div>
+        <!-- Telegram -->
+        <div class="social-item tg">
+          <button class="social-trigger" onclick="toggleSocialItem(this)">
+            <div class="social-icon tg"><i class="fa-brands fa-telegram"></i></div>
+            <div class="social-trigger-info">
+              <div class="social-trigger-sub">Social Media</div>
+              <div class="social-trigger-name">My Telegram</div>
+            </div>
+            <i class="fa-solid fa-chevron-down social-trigger-chevron"></i>
+          </button>
+          <div class="social-reveal">
+            <div class="social-reveal-inner">
+              <div class="social-reveal-id">@Wilykun1994</div>
+              <a class="social-visit-btn" href="https://t.me/Wilykun1994" target="_blank">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
+              </a>
+            </div>
           </div>
-          <i class="fa-solid fa-arrow-up-right-from-square social-arrow"></i>
-        </a>
+        </div>
 
-        <a class="social-card yt" href="https://youtube.com/@ukosamasomoni1956" target="_blank">
-          <div class="social-icon yt"><i class="fa-brands fa-youtube"></i></div>
-          <div class="social-info">
-            <div class="social-lbl">YouTube</div>
-            <div class="social-val">@ukosamasomoni1956</div>
+        <!-- Facebook -->
+        <div class="social-item fb">
+          <button class="social-trigger" onclick="toggleSocialItem(this)">
+            <div class="social-icon fb"><i class="fa-brands fa-facebook"></i></div>
+            <div class="social-trigger-info">
+              <div class="social-trigger-sub">Social Media</div>
+              <div class="social-trigger-name">My Facebook</div>
+            </div>
+            <i class="fa-solid fa-chevron-down social-trigger-chevron"></i>
+          </button>
+          <div class="social-reveal">
+            <div class="social-reveal-inner">
+              <div class="social-reveal-id">wily.kun.1</div>
+              <a class="social-visit-btn" href="https://www.facebook.com/wily.kun.1" target="_blank">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
+              </a>
+            </div>
           </div>
-          <i class="fa-solid fa-arrow-up-right-from-square social-arrow"></i>
-        </a>
+        </div>
+
+        <!-- YouTube -->
+        <div class="social-item yt">
+          <button class="social-trigger" onclick="toggleSocialItem(this)">
+            <div class="social-icon yt"><i class="fa-brands fa-youtube"></i></div>
+            <div class="social-trigger-info">
+              <div class="social-trigger-sub">Social Media</div>
+              <div class="social-trigger-name">My YouTube</div>
+            </div>
+            <i class="fa-solid fa-chevron-down social-trigger-chevron"></i>
+          </button>
+          <div class="social-reveal">
+            <div class="social-reveal-inner">
+              <div class="social-reveal-id">@ukosamasomoni1956</div>
+              <a class="social-visit-btn" href="https://youtube.com/@ukosamasomoni1956" target="_blank">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
+              </a>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -2377,6 +2464,16 @@
     btn.classList.toggle('open');
     const content = btn.nextElementSibling;
     content.classList.toggle('open');
+  }
+
+  // ─── SOCIAL ACCORDION ────────────────────────────────────────────────────
+  function toggleSocialItem(btn) {
+    const item = btn.closest('.social-item');
+    const isOpen = item.classList.contains('open');
+    // Tutup semua dulu
+    document.querySelectorAll('.social-item.open').forEach(el => el.classList.remove('open'));
+    // Buka yang diklik jika sebelumnya tertutup
+    if (!isOpen) item.classList.add('open');
   }
 
   // ─── CLOCK ───────────────────────────────────────────────────────────────
