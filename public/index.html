@@ -3172,20 +3172,32 @@
 
   // ─── VISITOR STATS & HEARTBEAT ───────────────────────────────────────────
   function formatNum(n) {
-    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-    if (n >= 1000)    return (n / 1000).toFixed(1) + 'K';
-    return String(n);
+    const num = Number(n);
+    if (!isFinite(num)) return '0';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000)    return (num / 1000).toFixed(1) + 'K';
+    return String(num);
+  }
+
+  function setStatEl(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = formatNum(val ?? 0);
   }
 
   async function fetchStats() {
     try {
       const res  = await fetch('/api/stats');
+      if (!res.ok) throw new Error('stats fetch failed');
       const data = await res.json();
-      const el = (id) => document.getElementById(id);
-      if (el('statOnline')) el('statOnline').textContent = formatNum(data.online);
-      if (el('statTotal'))  el('statTotal').textContent  = formatNum(data.total_visits);
-      if (el('statPeak'))   el('statPeak').textContent   = formatNum(data.peak_online);
-    } catch { /* silent */ }
+      setStatEl('statOnline', data.online);
+      setStatEl('statTotal',  data.total_visits);
+      setStatEl('statPeak',   data.peak_online);
+    } catch {
+      // Kalau gagal, tampilkan 0 bukan "—"
+      setStatEl('statOnline', 0);
+      setStatEl('statTotal',  0);
+      setStatEl('statPeak',   0);
+    }
   }
 
   async function sendHeartbeat() {

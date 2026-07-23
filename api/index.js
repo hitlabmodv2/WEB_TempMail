@@ -7,6 +7,22 @@ const TMailScraper = require('../src/scrape/scraper');
 const app = express();
 const FORCED_DOMAIN = 'us.seebestdeals.com';
 
+// ── Stats in-memory (persists dalam satu warm instance Vercel) ─────────────
+let siteStats = { total_visits: 0, peak_online: 0 };
+const onlineMap = new Map();
+const HEARTBEAT_TTL = 2 * 60 * 1000;
+
+function countOnline() {
+  const now = Date.now();
+  let count = 0;
+  onlineMap.forEach(v => { if (now - v.lastSeen < HEARTBEAT_TTL) count++; });
+  return count;
+}
+setInterval(() => {
+  const now = Date.now();
+  onlineMap.forEach((v, k) => { if (now - v.lastSeen >= HEARTBEAT_TTL) onlineMap.delete(k); });
+}, 60000);
+
 function randomName(len = 7) {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let value = '';
@@ -83,6 +99,30 @@ app.get('/api/reset', async (req, res) => {
     const scraper = getScraperForSession(req.session.id);
     res.json(await enforceDefaultDomain(scraper, await scraper.getMessages()));
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+// ── Heartbeat ──────────────────────────────────────────────────────────────
+app.post('/api/heartbeat', (req, res) => {
+  const sid = req.session.id;
+  const existing = onlineMap.get(sid);
+  if (!existing) {
+    siteStats.total_visits++;
+    onlineMap.set(sid, { lastSeen: Date.now() });
+  } else {
+    existing.lastSeen = Date.now();
+  }
+  const online = countOnline();
+  if (online > siteStats.peak_online) siteStats.peak_online = online;
+  res.json({ ok: true });
+});
+
+// ── Stats ──────────────────────────────────────────────────────────────────
+app.get('/api/stats', (req, res) => {
+  res.json({
+    online: countOnline(),
+    total_visits: siteStats.total_visits,
+    peak_online: siteStats.peak_online,
+  });
 });
 
 app.get('/api/server-info', (req, res) => {
