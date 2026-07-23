@@ -111,6 +111,23 @@ function randomName(len = 7) {
   return s;
 }
 
+async function enforceDefaultDomain(scraper, result) {
+  const mailbox = result?.data?.mailbox;
+  if (result?.success && mailbox?.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
+    return result;
+  }
+
+  const changed = await scraper.changeEmail(randomName(), FORCED_DOMAIN);
+  if (changed.success && changed.data?.mailbox?.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
+    return changed;
+  }
+
+  return {
+    success: false,
+    error: `Only @${FORCED_DOMAIN} addresses are supported`,
+  };
+}
+
 app.get('/api/messages', async (req, res) => {
   try {
     const isNewScraper = !scraperStore.has(req.session.id);
@@ -127,12 +144,12 @@ app.get('/api/messages', async (req, res) => {
         if (restored.success) {
           result = { success: true, data: restored.data };
         }
-      } else if (!mailbox.endsWith('@' + FORCED_DOMAIN)) {
-        // Paksa domain us.seebestdeals.com
-        const changed = await scraper.changeEmail(randomName(), FORCED_DOMAIN);
-        if (changed.success) result = { success: true, data: changed.data };
+      } else if (!mailbox.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
+        result = await enforceDefaultDomain(scraper, result);
       }
     }
+
+    result = await enforceDefaultDomain(scraper, result);
 
     // Simpan email aktif ke session supaya bisa di-restore setelah restart
     if (result.success && result.data && result.data.mailbox) {
@@ -149,7 +166,7 @@ app.post('/api/delete', async (req, res) => {
   try {
     const scraper = getScraperForSession(req.session.id);
     const result = await scraper.deleteEmail();
-    res.json(result);
+    res.json(await enforceDefaultDomain(scraper, result));
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -157,10 +174,10 @@ app.post('/api/delete', async (req, res) => {
 
 app.post('/api/change', async (req, res) => {
   try {
-    const { name, domain } = req.body;
+    const { name } = req.body;
     const scraper = getScraperForSession(req.session.id);
-    const result = await scraper.changeEmail(name, domain);
-    res.json(result);
+    const result = await scraper.changeEmail(name, FORCED_DOMAIN);
+    res.json(await enforceDefaultDomain(scraper, result));
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -210,7 +227,7 @@ app.get('/api/reset', async (req, res) => {
     scraperStore.delete(req.session.id);
     const scraper = getScraperForSession(req.session.id);
     const result = await scraper.getMessages();
-    res.json(result);
+    res.json(await enforceDefaultDomain(scraper, result));
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

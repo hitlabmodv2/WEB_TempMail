@@ -8,6 +8,17 @@
   <link rel="apple-touch-icon" href="/icon/favicon.png" />
   <link rel="shortcut icon" type="image/png" href="/icon/favicon.png" />
   <meta name="theme-color" content="#3d8bff" />
+  <script>
+    // Baca panel terakhir sebelum body dirender agar refresh tidak
+    // sempat menampilkan Inbox sebagai panel default.
+    try {
+      const initialPanel = localStorage.getItem('nm-panel');
+      document.documentElement.dataset.initialPanel =
+        initialPanel === 'server' || initialPanel === 'dev' ? initialPanel : 'tempmail';
+    } catch (_) {
+      document.documentElement.dataset.initialPanel = 'tempmail';
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -206,6 +217,28 @@
     /* ─── PANELS ─── */
     .panel { display: none; }
     .panel.active { display: block; }
+    /* Jangan gambar panel apa pun sampai state awal dari localStorage siap. */
+    html:not([data-initial-panel]) .panel { visibility: hidden; }
+    /* State panel ditentukan sebelum body dirender, bukan setelah load.
+       !important mengalahkan class .panel.active bawaan pada Inbox. */
+    html[data-initial-panel="tempmail"] #panel-server,
+    html[data-initial-panel="tempmail"] #panel-dev,
+    html[data-initial-panel="server"] #panel-tempmail,
+    html[data-initial-panel="server"] #panel-dev,
+    html[data-initial-panel="dev"] #panel-tempmail,
+    html[data-initial-panel="dev"] #panel-server { display: none !important; }
+    html[data-initial-panel="tempmail"] #panel-tempmail,
+    html[data-initial-panel="server"] #panel-server,
+    html[data-initial-panel="dev"] #panel-dev { display: block !important; }
+    html[data-initial-panel="server"] .tab-btn[data-panel="tempmail"],
+    html[data-initial-panel="dev"] .tab-btn[data-panel="tempmail"] {
+      background: transparent; color: var(--text2); box-shadow: none;
+    }
+    html[data-initial-panel="server"] .tab-btn[data-panel="server"],
+    html[data-initial-panel="dev"] .tab-btn[data-panel="dev"] {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; box-shadow: 0 4px 16px rgba(61,139,255,0.35);
+    }
 
     /* ─── QUICK NAV SHORTCUT BUTTONS (inside TempMail panel) ─── */
     .quick-nav-wrap {
@@ -1497,7 +1530,7 @@
   <p>Buat email sekali pakai dalam hitungan detik — <strong style="color:var(--text);font-weight:600;">tanpa daftar</strong>, tanpa jejak, langsung pakai.</p>
   <div class="hero-features">
     <span class="hero-feature"><i class="fa-solid fa-check"></i> Real-time inbox</span>
-    <span class="hero-feature"><i class="fa-solid fa-check"></i> Multi domain</span>
+    <span class="hero-feature"><i class="fa-solid fa-check"></i> @us.seebestdeals.com</span>
     <span class="hero-feature"><i class="fa-solid fa-check"></i> Anti spam</span>
     <span class="hero-feature"><i class="fa-solid fa-check"></i> 100% gratis</span>
   </div>
@@ -2207,7 +2240,9 @@
 
 <script>
   // ─── TABS ────────────────────────────────────────────────────────────────
-  let currentPanel = 'tempmail';
+  const VALID_PANELS = new Set(['tempmail', 'server', 'dev']);
+  const savedPanel = localStorage.getItem('nm-panel');
+  let currentPanel = VALID_PANELS.has(savedPanel) ? savedPanel : 'tempmail';
   let serverRefreshTimer = null;
 
   function switchTab(name, btn) {
@@ -2226,6 +2261,7 @@
   function activatePanel(name) {
     currentPanel = name;
     localStorage.setItem('nm-panel', name);
+    document.documentElement.dataset.initialPanel = name;
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + name).classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2425,15 +2461,14 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && document.getElementById('legalOverlay').classList.contains('open')) closeLegal();
   });
-  // Set tahun otomatis
-  document.addEventListener('DOMContentLoaded', () => {
-    const y = document.getElementById('footerYear');
-    if (y) y.textContent = new Date().getFullYear();
+  // Terapkan panel terakhir segera setelah markup panel tersedia.
+  // Jangan menunggu DOMContentLoaded karena Inbox aktif secara default di HTML
+  // dan akan terlihat berkedip saat halaman direfresh dari panel lain.
+  showPanel(currentPanel);
 
-    // Restore panel terakhir setelah refresh
-    const saved = localStorage.getItem('nm-panel');
-    if (saved && saved !== 'tempmail') showPanel(saved);
-  });
+  // Set tahun otomatis
+  const footerYear = document.getElementById('footerYear');
+  if (footerYear) footerYear.textContent = new Date().getFullYear();
 
   // ─── HOW IT WORKS toggle ──────────────────────────────────────────────────
   function toggleStep(stepEl) {

@@ -5,6 +5,31 @@ const cors = require('cors');
 const TMailScraper = require('../src/scrape/scraper');
 
 const app = express();
+const FORCED_DOMAIN = 'us.seebestdeals.com';
+
+function randomName(len = 7) {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let value = '';
+  for (let i = 0; i < len; i++) value += chars[Math.floor(Math.random() * chars.length)];
+  return value;
+}
+
+async function enforceDefaultDomain(scraper, result) {
+  const mailbox = result?.data?.mailbox;
+  if (result?.success && mailbox?.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
+    return result;
+  }
+
+  const changed = await scraper.changeEmail(randomName(), FORCED_DOMAIN);
+  if (changed.success && changed.data?.mailbox?.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
+    return changed;
+  }
+
+  return {
+    success: false,
+    error: `Only @${FORCED_DOMAIN} addresses are supported`,
+  };
+}
 
 app.use(cors());
 app.use(express.json());
@@ -24,19 +49,26 @@ function getScraperForSession(id) {
 }
 
 app.get('/api/messages', async (req, res) => {
-  try { res.json(await getScraperForSession(req.session.id).getMessages()); }
+  try {
+    const scraper = getScraperForSession(req.session.id);
+    res.json(await enforceDefaultDomain(scraper, await scraper.getMessages()));
+  }
   catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
 app.post('/api/delete', async (req, res) => {
-  try { res.json(await getScraperForSession(req.session.id).deleteEmail()); }
+  try {
+    const scraper = getScraperForSession(req.session.id);
+    res.json(await enforceDefaultDomain(scraper, await scraper.deleteEmail()));
+  }
   catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
 app.post('/api/change', async (req, res) => {
   try {
-    const { name, domain } = req.body;
-    res.json(await getScraperForSession(req.session.id).changeEmail(name, domain));
+    const { name } = req.body;
+    const scraper = getScraperForSession(req.session.id);
+    res.json(await enforceDefaultDomain(scraper, await scraper.changeEmail(name, FORCED_DOMAIN)));
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
@@ -48,7 +80,8 @@ app.get('/api/view/:id', async (req, res) => {
 app.get('/api/reset', async (req, res) => {
   try {
     scraperStore.delete(req.session.id);
-    res.json(await getScraperForSession(req.session.id).getMessages());
+    const scraper = getScraperForSession(req.session.id);
+    res.json(await enforceDefaultDomain(scraper, await scraper.getMessages()));
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 

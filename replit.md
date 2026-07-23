@@ -25,11 +25,9 @@ A real-time disposable email web app powered by scraping tmail.etokom.com.
 | GET | `/api/view/:id` | View a specific email message |
 | GET | `/api/reset` | Reset session and get fresh email |
 
-## Available Domains
+## Available Domain
 
-- `t.etokom.com`
 - `us.seebestdeals.com`
-- `gift4zone.top`
 
 ## Run
 

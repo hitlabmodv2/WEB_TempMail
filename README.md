@@ -18,7 +18,7 @@
 
 - 📮 Email sekali pakai instan — tanpa daftar
 - 🔄 Auto-refresh inbox tiap 5 detik
-- 🌐 Multi-domain (`t.etokom.com`, `us.seebestdeals.com`, `gift4zone.top`)
+- 🌐 Domain default: `us.seebestdeals.com`
 - 📱 UI responsif (mobile + desktop)
 - 🎨 Dark mode modern
 - 📊 Server info & developer panel built-in

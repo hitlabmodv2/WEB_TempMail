@@ -1,6 +1,22 @@
 const axios = require('axios');
 
 const BASE_URL = 'https://tmail.etokom.com/';
+const DEFAULT_DOMAIN = 'us.seebestdeals.com';
+
+function normalizeMailboxData(data) {
+  if (!data || typeof data !== 'object') return data;
+
+  const normalized = { ...data };
+  if (Array.isArray(normalized.histories)) {
+    normalized.histories = normalized.histories.filter((history) => (
+      history &&
+      typeof history.email === 'string' &&
+      history.email.toLowerCase().endsWith('@' + DEFAULT_DOMAIN)
+    ));
+  }
+
+  return normalized;
+}
 
 class TMailScraper {
   constructor() {
@@ -87,7 +103,7 @@ class TMailScraper {
       this._parseCookies(res.headers['set-cookie']);
 
       if (res.data && res.data.mailbox) {
-        return { success: true, data: res.data };
+        return { success: true, data: normalizeMailboxData(res.data) };
       }
 
       return { success: false, error: 'No mailbox in response', raw: res.data };
@@ -112,20 +128,20 @@ class TMailScraper {
       });
 
       this._parseCookies(res.headers['set-cookie']);
-      return { success: true, data: res.data };
+      return { success: true, data: normalizeMailboxData(res.data) };
     } catch (err) {
       return { success: false, error: err.message };
     }
   }
 
-  async changeEmail(name, domain) {
+  async changeEmail(name, domain = DEFAULT_DOMAIN) {
     if (!this.initialized) await this.init();
 
     try {
       const res = await axios.post(BASE_URL + 'change', {
         _token: this.csrfToken,
         name,
-        domain,
+        domain: DEFAULT_DOMAIN,
       }, {
         headers: this._headers({
           'Content-Type': 'application/json',
@@ -138,7 +154,7 @@ class TMailScraper {
       this._parseCookies(res.headers['set-cookie']);
 
       if (res.data && res.data.mailbox) {
-        return { success: true, data: res.data };
+        return { success: true, data: normalizeMailboxData(res.data) };
       }
       return { success: false, error: 'Failed to change email', raw: res.data };
     } catch (err) {
