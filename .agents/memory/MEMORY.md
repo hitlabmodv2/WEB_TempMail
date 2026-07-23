@@ -1,2 +1,3 @@
 - [Vercel dependency lockfile](vercel-dependency-lockfile.md) — jangan kirim lockfile hasil instalasi Replit ke Vercel karena registry internal tidak dapat diakses production.
 - [Panel reload flicker](panel-reload-flicker.md) — state panel harus diterapkan di head sebelum body dirender agar panel default tidak berkedip saat refresh.
+- [Notification audio](notification-audio.md) — gunakan Raw GitHub sebagai sumber audio dengan fallback lokal dan tangani penolakan autoplay.

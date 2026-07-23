@@ -829,6 +829,26 @@
     .dev-role {
       position: relative; font-size: 0.78rem; color: var(--text2); margin-bottom: 16px; letter-spacing: 0.3px;
     }
+    .dev-typing {
+      position: relative; display: flex; align-items: flex-start; gap: 8px;
+      width: min(100%, 560px); min-height: 34px;
+      margin: -2px auto 18px; padding: 8px 14px;
+      border: 1px solid rgba(61,139,255,0.28); border-radius: 14px;
+      background: rgba(10,14,26,0.48); color: var(--text2);
+      font: 500 0.76rem/1.4 'Inter', sans-serif;
+      text-align: left; box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+    }
+    .dev-typing > i { color: var(--accent); font-size: 0.7rem; flex: 0 0 auto; }
+    .dev-typing-text {
+      min-width: 0; flex: 1; white-space: normal; overflow: visible;
+      text-overflow: clip; overflow-wrap: anywhere; word-break: normal;
+    }
+    .dev-typing-caret {
+      width: 2px; height: 15px; flex: 0 0 2px;
+      margin-top: 2px; background: var(--accent); border-radius: 2px;
+      animation: dev-caret 0.85s steps(1) infinite;
+    }
+    @keyframes dev-caret { 50% { opacity: 0; } }
     .dev-badges {
       position: relative; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
     }
@@ -946,6 +966,10 @@
       padding: 2px 14px 14px;
       display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
     }
+    .social-click-message {
+      width: 100%; color: var(--text3); font-size: 0.7rem;
+      line-height: 1.35; font-style: italic;
+    }
     .social-reveal-id {
       font-family: monospace; font-size: 0.78rem; color: var(--text2);
       background: var(--bg); border: 1px solid var(--border);
@@ -1001,6 +1025,7 @@
       .dev-hero { padding: 32px 16px 24px; }
       .dev-stat-val { font-size: 1.1rem; }
       .dev-name { font-size: 1.25rem; }
+      .dev-typing { width: 100%; margin-top: -2px; padding: 8px 11px; font-size: 0.7rem; }
     }
 
     /* ─── FOOTER ─── */
@@ -1873,6 +1898,11 @@
 
         <div class="dev-name">Wily Kun</div>
         <div class="dev-role"><i class="fa-solid fa-location-dot" style="color:var(--accent);margin-right:5px;font-size:0.7rem;"></i>Indonesia &nbsp;·&nbsp; Full Stack Developer &amp; Bot Creator</div>
+        <div class="dev-typing" aria-live="polite" aria-label="Pesan developer otomatis">
+          <i class="fa-solid fa-terminal"></i>
+          <span class="dev-typing-text" id="devTypingText">Menulis ide baru...</span>
+          <span class="dev-typing-caret" aria-hidden="true"></span>
+        </div>
 
         <div class="dev-badges">
           <span class="dev-badge owner"><i class="fa-solid fa-crown"></i>OWNER</span>
@@ -1915,7 +1945,7 @@
       <div class="social-list">
 
         <!-- WhatsApp -->
-        <div class="social-item wa">
+        <div class="social-item wa" data-social="whatsapp">
           <button class="social-trigger" onclick="toggleSocialItem(this)">
             <div class="social-icon wa"><i class="fa-brands fa-whatsapp"></i></div>
             <div class="social-trigger-info">
@@ -1926,7 +1956,8 @@
           </button>
           <div class="social-reveal">
             <div class="social-reveal-inner">
-              <div class="social-reveal-id">089-688-206-739</div>
+              <div class="social-click-message" aria-live="polite"></div>
+              <div class="social-reveal-id">Bang Wily</div>
               <a class="social-visit-btn" href="https://wa.me/6289688206739" target="_blank">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
               </a>
@@ -1935,7 +1966,7 @@
         </div>
 
         <!-- Telegram -->
-        <div class="social-item tg">
+        <div class="social-item tg" data-social="telegram">
           <button class="social-trigger" onclick="toggleSocialItem(this)">
             <div class="social-icon tg"><i class="fa-brands fa-telegram"></i></div>
             <div class="social-trigger-info">
@@ -1946,6 +1977,7 @@
           </button>
           <div class="social-reveal">
             <div class="social-reveal-inner">
+              <div class="social-click-message" aria-live="polite"></div>
               <div class="social-reveal-id">@Wilykun1994</div>
               <a class="social-visit-btn" href="https://t.me/Wilykun1994" target="_blank">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
@@ -1955,7 +1987,7 @@
         </div>
 
         <!-- Facebook -->
-        <div class="social-item fb">
+        <div class="social-item fb" data-social="facebook">
           <button class="social-trigger" onclick="toggleSocialItem(this)">
             <div class="social-icon fb"><i class="fa-brands fa-facebook"></i></div>
             <div class="social-trigger-info">
@@ -1966,7 +1998,8 @@
           </button>
           <div class="social-reveal">
             <div class="social-reveal-inner">
-              <div class="social-reveal-id">wily.kun.1</div>
+              <div class="social-click-message" aria-live="polite"></div>
+              <div class="social-reveal-id">Wily Kun</div>
               <a class="social-visit-btn" href="https://www.facebook.com/wily.kun.1" target="_blank">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
               </a>
@@ -1975,7 +2008,7 @@
         </div>
 
         <!-- YouTube -->
-        <div class="social-item yt">
+        <div class="social-item yt" data-social="youtube">
           <button class="social-trigger" onclick="toggleSocialItem(this)">
             <div class="social-icon yt"><i class="fa-brands fa-youtube"></i></div>
             <div class="social-trigger-info">
@@ -1986,6 +2019,7 @@
           </button>
           <div class="social-reveal">
             <div class="social-reveal-inner">
+              <div class="social-click-message" aria-live="polite"></div>
               <div class="social-reveal-id">@ukosamasomoni1956</div>
               <a class="social-visit-btn" href="https://youtube.com/@ukosamasomoni1956" target="_blank">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
@@ -2244,6 +2278,63 @@
   const savedPanel = localStorage.getItem('nm-panel');
   let currentPanel = VALID_PANELS.has(savedPanel) ? savedPanel : 'tempmail';
   let serverRefreshTimer = null;
+  let devTypingTimer = null;
+  let devTypingSession = 0;
+
+  const DEV_TYPING_MESSAGES = [
+    'Pelan-pelan, yang penting tetap bergerak.',
+    'Ide kecil hari ini bisa jadi karya besar besok.',
+    'Jangan takut gagal, takutlah berhenti mencoba.',
+    'Code, learn, repeat — terus berkembang setiap hari.',
+    'Bukan tentang siapa yang paling cepat, tapi siapa yang tidak menyerah.',
+    'Mimpi tanpa aksi hanya akan tetap menjadi mimpi.',
+    'Semangat! Bug hari ini adalah ilmu untuk hari esok.',
+    'Kekuatan sejati lahir dari hati yang tidak mudah menyerah.',
+    'Kalau belum berhasil, berarti ceritanya belum selesai.',
+    'Believe in yourself and create your own future.',
+    'Plus Ultra! Terus melampaui batasmu sendiri.',
+    'Ore wa kaizoku ou ni naru! Kejar impianmu sampai tercapai.',
+  ];
+
+  function stopDevTyping() {
+    devTypingSession++;
+    if (devTypingTimer) {
+      clearTimeout(devTypingTimer);
+      devTypingTimer = null;
+    }
+  }
+
+  function startDevTyping() {
+    stopDevTyping();
+    const textEl = document.getElementById('devTypingText');
+    if (!textEl) return;
+
+    const session = devTypingSession;
+    let messageIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+
+    function tick() {
+      if (session !== devTypingSession || currentPanel !== 'dev') return;
+      const message = DEV_TYPING_MESSAGES[messageIndex];
+      charIndex += deleting ? -1 : 1;
+      textEl.textContent = message.slice(0, charIndex);
+
+      let delay = deleting ? 28 : 52;
+      if (!deleting && charIndex >= message.length) {
+        deleting = true;
+        delay = 2200;
+      } else if (deleting && charIndex <= 0) {
+        deleting = false;
+        messageIndex = (messageIndex + 1) % DEV_TYPING_MESSAGES.length;
+        delay = 450;
+      }
+      devTypingTimer = setTimeout(tick, delay);
+    }
+
+    textEl.textContent = '';
+    tick();
+  }
 
   function switchTab(name, btn) {
     activatePanel(name);
@@ -2268,11 +2359,14 @@
     updateFAB();
 
     clearInterval(serverRefreshTimer);
+    stopDevTyping();
     if (name === 'server') {
       loadServerInfo();
       serverRefreshTimer = setInterval(() => {
         if (currentPanel === 'server') loadServerInfo();
       }, 8000);
+    } else if (name === 'dev') {
+      startDevTyping();
     }
   }
 
@@ -2540,13 +2634,49 @@
   }
 
   // ─── SOCIAL ACCORDION ────────────────────────────────────────────────────
+  const SOCIAL_MESSAGES = {
+    whatsapp: [
+      'Bang Wily siap menyapa — klik Visit untuk terhubung.',
+      'Pesan singkat, koneksi yang berarti.',
+      'Ada ide? Bang Wily senang mendengarnya.',
+      'Salam hangat dari balik layar NovaMail.',
+    ],
+    telegram: [
+      'Telegram terbuka untuk berbagi kabar dan ide.',
+      'Satu pesan bisa jadi awal kolaborasi baru.',
+      'Yuk tetap terhubung dan terus berkarya.',
+      'Channel ngobrol santai, ide serius.',
+    ],
+    facebook: [
+      'Temukan cerita dan aktivitas terbaru di Facebook.',
+      'Jangan lupa tinggalkan jejak positif hari ini.',
+      'Berbagi inspirasi, membangun koneksi.',
+      'Setiap karya punya cerita untuk dibagikan.',
+    ],
+    youtube: [
+      'Siapkan popcorn, waktunya menikmati karya baru.',
+      'Tonton, dukung, dan terus sebarkan energi positif.',
+      'Ide visual, cerita seru, dan semangat berkarya.',
+      'Satu video, satu inspirasi baru.',
+    ],
+  };
+
+  function getRandomSocialMessage(channel) {
+    const messages = SOCIAL_MESSAGES[channel] || ['Tetap semangat dan terus berkarya!'];
+    return messages[Math.floor(Math.random() * messages.length)];
+  }
+
   function toggleSocialItem(btn) {
     const item = btn.closest('.social-item');
     const isOpen = item.classList.contains('open');
     // Tutup semua dulu
     document.querySelectorAll('.social-item.open').forEach(el => el.classList.remove('open'));
     // Buka yang diklik jika sebelumnya tertutup
-    if (!isOpen) item.classList.add('open');
+    if (!isOpen) {
+      item.classList.add('open');
+      const message = item.querySelector('.social-click-message');
+      if (message) message.textContent = getRandomSocialMessage(item.dataset.social);
+    }
   }
 
   // ─── CLOCK ───────────────────────────────────────────────────────────────
@@ -2627,12 +2757,23 @@
   // ─── NOTIFICATION SOUND ───────────────────────────────────────────────────
   let soundEnabled = true;
   let _notifAudio = null;
+  let _notifAudioFailed = false;
+  const NOTIF_SOUND_URL = 'https://raw.githubusercontent.com/hitlabmodv2/WEB_TempMail/main/public/sounds/notif.mp3';
+  const NOTIF_SOUND_FALLBACK = '/sounds/notif.mp3';
 
   function getNotifAudio() {
     if (!_notifAudio) {
-      _notifAudio = new Audio('/sounds/notif.mp3');
+      _notifAudio = new Audio(NOTIF_SOUND_URL);
       _notifAudio.preload = 'auto';
       _notifAudio.volume = 0.75;
+      _notifAudio.addEventListener('error', () => {
+        _notifAudioFailed = true;
+        // Fallback lokal jika Raw GitHub sedang tidak tersedia.
+        if (_notifAudio.src !== new URL(NOTIF_SOUND_FALLBACK, window.location.href).href) {
+          _notifAudio.src = NOTIF_SOUND_FALLBACK;
+          _notifAudio.load();
+        }
+      }, { once: true });
     }
     return _notifAudio;
   }
@@ -2651,7 +2792,10 @@
       const audio = getNotifAudio();
       audio.currentTime = 0;
       await audio.play();
-    } catch(e) { console.warn('Sound error:', e.message); }
+    } catch (_) {
+      // Autoplay bisa diblokir browser sebelum ada interaksi pengguna.
+      // Jangan menampilkan error ke console atau mengganggu inbox.
+    }
   }
 
   // Notif animasi waifu/alisa sudah dinonaktifkan sesuai permintaan
