@@ -57,6 +57,15 @@
       background-repeat: no-repeat;
       transition: background-image 0.8s ease, opacity 0.8s ease;
     }
+    /* Overlay tipis — biar teks tetap kebaca tanpa nutup background */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: rgba(10, 14, 26, 0.45);
+      pointer-events: none;
+    }
     body.tod-morning { --time-bg: url('/bg/morning.png'); }
     body.tod-noon    { --time-bg: url('/bg/noon.png'); }
     body.tod-evening { --time-bg: url('/bg/evening.png'); }
