@@ -57,15 +57,6 @@
       background-repeat: no-repeat;
       transition: background-image 0.8s ease, opacity 0.8s ease;
     }
-    /* Dark overlay so UI text tetap kebaca di atas background */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      background: linear-gradient(180deg, rgba(10,14,26,0.78) 0%, rgba(10,14,26,0.88) 100%);
-      pointer-events: none;
-    }
     body.tod-morning { --time-bg: url('/bg/morning.png'); }
     body.tod-noon    { --time-bg: url('/bg/noon.png'); }
     body.tod-evening { --time-bg: url('/bg/evening.png'); }
