@@ -2192,6 +2192,7 @@
 
   function activatePanel(name) {
     currentPanel = name;
+    localStorage.setItem('nm-panel', name);
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + name).classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2395,6 +2396,10 @@
   document.addEventListener('DOMContentLoaded', () => {
     const y = document.getElementById('footerYear');
     if (y) y.textContent = new Date().getFullYear();
+
+    // Restore panel terakhir setelah refresh
+    const saved = localStorage.getItem('nm-panel');
+    if (saved && saved !== 'tempmail') showPanel(saved);
   });
 
   // ─── HOW IT WORKS toggle ──────────────────────────────────────────────────
