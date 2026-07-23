@@ -24,6 +24,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    /* Paksa semua animasi/transisi pakai GPU — hindari layout thrashing */
+    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
     :root {
       --bg: #0a0e1a;
@@ -52,8 +55,10 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      overflow-x: clip;
+      overflow-x: hidden;
       -webkit-text-size-adjust: 100%;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
       position: relative;
     }
     /* Anime waifu coding background — switches by time of day */
@@ -67,6 +72,10 @@
       background-position: center center;
       background-repeat: no-repeat;
       transition: background-image 0.8s ease, opacity 0.8s ease;
+      /* GPU compositing layer — cegah repaint setiap scroll frame */
+      will-change: transform;
+      transform: translateZ(0);
+      backface-visibility: hidden;
     }
     /* Overlay tipis — biar teks tetap kebaca tanpa nutup background */
     body::after {
@@ -76,6 +85,10 @@
       z-index: -1;
       background: rgba(10, 14, 26, 0.45);
       pointer-events: none;
+      /* GPU compositing layer */
+      will-change: transform;
+      transform: translateZ(0);
+      backface-visibility: hidden;
     }
     body.tod-morning { --time-bg: url('/bg/morning.png'); }
     body.tod-noon    { --time-bg: url('/bg/noon.png'); }
@@ -372,7 +385,7 @@
     @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
 
     /* ─── CARD ─── */
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; contain: layout style; }
     .card-header {
       padding: 15px 20px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
