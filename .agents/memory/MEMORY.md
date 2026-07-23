@@ -1,0 +1,1 @@
+- [Vercel dependency lockfile](vercel-dependency-lockfile.md) — jangan kirim lockfile hasil instalasi Replit ke Vercel karena registry internal tidak dapat diakses production.

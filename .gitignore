@@ -1,6 +1,5 @@
 node_modules/
 session/
-package-lock.json
 .upm/
 .cache/
 .local/

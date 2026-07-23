@@ -3,7 +3,7 @@
   "version": 2,
   "functions": {
     "api/index.js": {
-      "runtime": "nodejs20.x"
+      "runtime": "nodejs24.x"
     }
   },
   "routes": [
