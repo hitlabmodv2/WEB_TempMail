@@ -215,10 +215,22 @@ class TMailScraper {
         /class="[^"]*mail-view-header-date[^"]*"[^>]*>[\s\S]*?<span[^>]*>([\s\S]*?)<\/span>/i,
         /class="[^"]*date[^"]*"[^>]*>[\s\S]*?<span[^>]*>([\s\S]*?)<\/span>/i,
         /"created_at"\s*:\s*"([^"]+)"/,
+        /"date"\s*:\s*"([^"]+)"/,
+        /"time"\s*:\s*"([^"]+)"/,
+        /<time[^>]*datetime="([^"]+)"/i,
+        /data-date="([^"]+)"/i,
+        /data-time="([^"]+)"/i,
+        /class="[^"]*timestamp[^"]*"[^>]*>([\s\S]*?)<\//i,
+        /class="[^"]*time[^"]*"[^>]*>([\s\S]*?)<\//i,
       ];
       for (const p of datePatterns) {
         const m = html.match(p);
         if (m) { const v = m[1].replace(/<[^>]+>/g,'').trim(); if (v) { date = v; break; } }
+      }
+      // Fallback: cari ISO timestamp di raw HTML
+      if (!date) {
+        const isoMatch = html.match(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?)/);
+        if (isoMatch) date = isoMatch[1];
       }
 
       if (bodyMatch) {
