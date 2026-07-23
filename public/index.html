@@ -2524,27 +2524,22 @@
   }
 
   // ─── NOTIFICATION SOUND ───────────────────────────────────────────────────
-  let audioCtx = null;
   let soundEnabled = true;
-  let soundUnlocked = false;
+  let _notifAudio = null;
 
-  function getAudioCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    return audioCtx;
+  function getNotifAudio() {
+    if (!_notifAudio) {
+      _notifAudio = new Audio('/sounds/notif.mp3');
+      _notifAudio.preload = 'auto';
+      _notifAudio.volume = 0.75;
+    }
+    return _notifAudio;
   }
 
+  // Unlock autoplay policy pada interaksi pertama user
   function unlockAudio() {
-    if (soundUnlocked) return;
-    try {
-      const ctx = getAudioCtx();
-      if (ctx.state === 'suspended') ctx.resume();
-      const buf = ctx.createBuffer(1, 1, 22050);
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
-      src.connect(ctx.destination);
-      src.start(0);
-      soundUnlocked = true;
-    } catch(e) {}
+    const audio = getNotifAudio();
+    audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
   }
   document.addEventListener('click', unlockAudio, { once: true });
   document.addEventListener('touchstart', unlockAudio, { once: true });
@@ -2552,24 +2547,9 @@
   async function playNotificationSound() {
     if (!soundEnabled) return;
     try {
-      const ctx = getAudioCtx();
-      if (ctx.state === 'suspended') await ctx.resume();
-      const now = ctx.currentTime;
-
-      // Two-tone soft chime (pleasant, not robotic)
-      function chime(freq, t, vol) {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, t);
-        gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(vol, t + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
-        osc.start(t); osc.stop(t + 0.65);
-      }
-      chime(1047, now, 0.18);        // C6
-      chime(1319, now + 0.18, 0.15); // E6
+      const audio = getNotifAudio();
+      audio.currentTime = 0;
+      await audio.play();
     } catch(e) { console.warn('Sound error:', e.message); }
   }
 
