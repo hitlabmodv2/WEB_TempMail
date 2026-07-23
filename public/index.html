@@ -442,8 +442,34 @@
     .domain-row select {
       background: var(--bg2); border: 1.5px solid var(--border);
       border-radius: var(--radius2); color: var(--text); font-family: 'Inter', sans-serif;
-      font-size: 0.83rem; padding: 10px 12px; outline: none; cursor: pointer; min-width: 130px;
+      font-size: 0.83rem; padding: 10px 12px; outline: none; cursor: pointer;
+      min-width: 0; max-width: 100%; box-sizing: border-box;
     }
+
+    /* ─── CUSTOM EMAIL FORM ─── */
+    .custom-email-form { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+    /* Grid: input otomatis isi sisa ruang, tombol 🎲 auto-size — aman semua layar */
+    .custom-name-row {
+      display: grid; grid-template-columns: 1fr auto; gap: 8px; width: 100%;
+    }
+    .custom-name-input {
+      width: 100%; min-width: 0; box-sizing: border-box;
+      background: var(--bg2); border: 1.5px solid var(--border);
+      border-radius: var(--radius2); color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: 0.85rem; padding: 10px 14px; outline: none; transition: border-color 0.2s;
+    }
+    .custom-name-input:focus { border-color: var(--accent); }
+    .custom-shuffle-btn { flex-shrink: 0; padding: 10px 13px !important; white-space: nowrap; }
+    .custom-domain-select {
+      width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box;
+      background: var(--bg2); border: 1.5px solid var(--border);
+      border-radius: var(--radius2); color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: 0.85rem; padding: 10px 14px; outline: none; cursor: pointer;
+    }
+    .custom-action-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%;
+    }
+    .custom-action-row .btn { width: 100%; }
 
     /* ─── BUTTONS ─── */
     .btn-row { display: flex; gap: 8px; flex-wrap: nowrap; }
@@ -1114,8 +1140,6 @@
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
     @media (max-width: 480px) {
-      .domain-row { flex-direction: column; }
-      .domain-row select { min-width: unset; }
       .server-grid { grid-template-columns: 1fr; }
     }
 
@@ -1166,12 +1190,7 @@
       .qnb-title { font-size: 0.82rem; }
       .qnb-sub { font-size: 0.68rem; }
 
-      /* Domain row pada Change Email — full width di mobile */
-      .domain-row { flex-direction: column; gap: 8px; }
-      .domain-row > * { width: 100% !important; flex-shrink: 1 !important; min-width: 0 !important; }
-      .domain-row select { width: 100% !important; min-width: 0 !important; max-width: 100% !important; }
-      .domain-row > div { width: 100% !important; }
-      .domain-row input { width: 100% !important; }
+      /* Custom email form di mobile — sudah pakai class baru, tidak perlu override tambahan */
 
       /* Server stat card */
       .server-stat-value { font-size: 1.3rem; }
@@ -1551,22 +1570,24 @@
             <div class="card-title"><i class="fa-solid fa-pen-to-square"></i> Custom Email</div>
           </div>
           <div class="card-body">
-            <div class="domain-row">
-              <div style="display:flex;gap:6px;flex:1;min-width:0;">
-                <input type="text" id="customName" placeholder="username" style="flex:1;min-width:0;" />
-                <button class="btn btn-sm btn-secondary" onclick="fillRandomName()" title="Generate random name" style="flex-shrink:0;padding:8px 11px;">
+            <div class="custom-email-form">
+              <div class="custom-name-row">
+                <input type="text" id="customName" placeholder="username" class="custom-name-input" />
+                <button class="btn btn-sm btn-secondary custom-shuffle-btn" onclick="fillRandomName()" title="Generate random name">
                   <i class="fa-solid fa-shuffle"></i>
                 </button>
               </div>
-              <select id="customDomain" style="min-width:0;width:100%;">
+              <select id="customDomain" class="custom-domain-select">
                 <option value="us.seebestdeals.com">@us.seebestdeals.com</option>
               </select>
-            </div>
-            <div class="btn-row">
-              <button class="btn btn-primary" onclick="changeEmail()" style="flex:1;">
-                <i class="fa-solid fa-check"></i> Apply
-              </button>
-              <button class="btn btn-secondary" onclick="toggleChangeForm()">Cancel</button>
+              <div class="custom-action-row">
+                <button class="btn btn-primary" onclick="changeEmail()">
+                  <i class="fa-solid fa-check"></i> Apply
+                </button>
+                <button class="btn btn-secondary" onclick="toggleChangeForm()">
+                  <i class="fa-solid fa-xmark"></i> Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2099,7 +2120,7 @@
           <div class="hiw-step-detail">
             <p>Kontrol penuh atas alamat email kamu:</p>
             <ul>
-              <li>✏️ <strong>Change</strong> — input nama custom (misal: <code>akusayang@</code>) + pilih dari 3 domain (<code>t.etokom.com</code>, <code>us.seebestdeals.com</code>, <code>gift4zone.top</code>).</li>
+              <li>✏️ <strong>Change</strong> — input nama custom (misal: <code>akusayang@</code>) + domain <code>@us.seebestdeals.com</code> yang tersedia.</li>
               <li>🗑️ <strong>Delete</strong> — hapus email lama, otomatis dapet email random baru.</li>
               <li>🔁 <strong>Refresh</strong> — paksa sinkron ulang inbox.</li>
             </ul>
@@ -2424,9 +2445,7 @@
 
         <h4><i class="fa-solid fa-globe"></i> Domain Tersedia</h4>
         <ul>
-          <li><code>@t.etokom.com</code></li>
           <li><code>@us.seebestdeals.com</code></li>
-          <li><code>@gift4zone.top</code></li>
         </ul>
 
         <h4><i class="fa-solid fa-circle-info"></i> Versi & Build</h4>
@@ -2920,24 +2939,6 @@
   // ─── INIT ─────────────────────────────────────────────────────────────────
   (async function() {
     await fetchMessages(false);
-    // Auto-switch ke us.seebestdeals.com jika email aktif bukan domain itu
-    if (currentEmail && !currentEmail.endsWith('@us.seebestdeals.com')) {
-      try {
-        const rname = genRandomName();
-        const r = await fetch('/api/change', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({name: rname, domain: 'us.seebestdeals.com'})
-        });
-        const d = await r.json();
-        if (d.success && d.data && d.data.mailbox) {
-          currentEmail = d.data.mailbox;
-          currentMessages = d.data.messages || [];
-          document.getElementById('emailDisplay').value = currentEmail;
-          renderInbox(currentMessages);
-          setStatus('success','Email siap — auto-refresh tiap 5 detik');
-        }
-      } catch(e) {}
-    }
     startAutoRefresh();
   })();
 </script>

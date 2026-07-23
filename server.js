@@ -56,10 +56,29 @@ function getScraperForSession(sessionId) {
   return scraperStore.get(sessionId);
 }
 
+const FORCED_DOMAIN = 'us.seebestdeals.com';
+
+function randomName(len = 7) {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let s = '';
+  for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+
 app.get('/api/messages', async (req, res) => {
   try {
     const scraper = getScraperForSession(req.session.id);
-    const result = await scraper.getMessages();
+    let result = await scraper.getMessages();
+
+    // Paksa domain us.seebestdeals.com — jika API assign domain lain, langsung change
+    if (result.success && result.data && result.data.mailbox) {
+      const mailbox = result.data.mailbox;
+      if (!mailbox.endsWith('@' + FORCED_DOMAIN)) {
+        const changed = await scraper.changeEmail(randomName(), FORCED_DOMAIN);
+        if (changed.success) result = { success: true, data: changed.data };
+      }
+    }
+
     res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
