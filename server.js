@@ -5,6 +5,52 @@ const path = require('path');
 const fs = require('fs');
 const TMailScraper = require('./src/scrape/scraper');
 
+// ── Stats persistence (data/stats.dat) ────────────────────────────────────
+const STATS_FILE = path.join(__dirname, 'data', 'stats.dat');
+
+function readStats() {
+  try {
+    const lines = fs.readFileSync(STATS_FILE, 'utf8').trim().split('\n');
+    const obj = {};
+    lines.forEach(l => {
+      const [k, v] = l.split('=');
+      if (k && v !== undefined) obj[k.trim()] = Number(v.trim());
+    });
+    return {
+      total_visits: obj.total_visits || 0,
+      peak_online:  obj.peak_online  || 0,
+    };
+  } catch { return { total_visits: 0, peak_online: 0 }; }
+}
+
+function writeStats(stats) {
+  try {
+    const content = `total_visits=${stats.total_visits}\npeak_online=${stats.peak_online}\n`;
+    fs.mkdirSync(path.dirname(STATS_FILE), { recursive: true });
+    fs.writeFileSync(STATS_FILE, content, 'utf8');
+  } catch(e) { console.error('Stats write error:', e.message); }
+}
+
+let siteStats = readStats();
+
+// ── Online visitor tracking (heartbeat) ───────────────────────────────────
+// Map: sessionId → { lastSeen: timestamp, counted: bool }
+const onlineMap = new Map();
+const HEARTBEAT_TTL = 2 * 60 * 1000; // 2 menit tanpa heartbeat = offline
+
+function countOnline() {
+  const now = Date.now();
+  let count = 0;
+  onlineMap.forEach((v) => { if (now - v.lastSeen < HEARTBEAT_TTL) count++; });
+  return count;
+}
+
+// Bersihkan sesi yang sudah offline tiap 1 menit
+setInterval(() => {
+  const now = Date.now();
+  onlineMap.forEach((v, k) => { if (now - v.lastSeen >= HEARTBEAT_TTL) onlineMap.delete(k); });
+}, 60 * 1000);
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -115,6 +161,34 @@ app.get('/api/view/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+// ── Heartbeat — client kirim tiap 30 detik ────────────────────────────────
+app.post('/api/heartbeat', (req, res) => {
+  const sid = req.session.id;
+  const existing = onlineMap.get(sid);
+  if (!existing) {
+    // Kunjungan baru — tambah total_visits
+    siteStats.total_visits++;
+    onlineMap.set(sid, { lastSeen: Date.now() });
+  } else {
+    existing.lastSeen = Date.now();
+  }
+  // Update peak online
+  const online = countOnline();
+  if (online > siteStats.peak_online) siteStats.peak_online = online;
+  writeStats(siteStats);
+  res.json({ ok: true });
+});
+
+// ── Stats — online, total visits, peak ────────────────────────────────────
+app.get('/api/stats', (req, res) => {
+  const online = countOnline();
+  res.json({
+    online,
+    total_visits: siteStats.total_visits,
+    peak_online:  siteStats.peak_online,
+  });
 });
 
 app.get('/api/reset', async (req, res) => {

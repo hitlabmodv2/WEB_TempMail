@@ -971,6 +971,22 @@
     }
 
     /* ─── FOOTER ─── */
+    /* ── Footer Stats ── */
+    .footer-stats {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 20px;
+      margin-bottom: 18px;
+    }
+    .fstat {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 16px; border-radius: 50px;
+      border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+      font-size: 0.75rem; font-weight: 600; color: var(--text2);
+    }
+    .fstat .fstat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .fstat.online  .fstat-dot { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse-dot 1.5s infinite; }
+    .fstat.total   .fstat-dot { background: var(--accent); }
+    .fstat.peak    .fstat-dot { background: var(--yellow); }
+    .fstat-val { color: var(--text); font-weight: 700; }
     footer { border-top: 1px solid var(--border); padding: 32px 20px 24px; text-align: center; background: rgba(10,14,26,0.6); }
     .footer-inner { max-width: 700px; margin: 0 auto; }
     .footer-links {
@@ -2109,6 +2125,23 @@
   <div class="footer-inner">
     <div class="footer-brand"><i class="fa-solid fa-bolt-lightning"></i> NovaMail</div>
     <div class="footer-text">Instant · Private · Anonymous · by Wily Kun</div>
+
+    <!-- Realtime stats -->
+    <div class="footer-stats">
+      <div class="fstat online">
+        <span class="fstat-dot"></span>
+        <span><span class="fstat-val" id="statOnline">—</span> Online Sekarang</span>
+      </div>
+      <div class="fstat total">
+        <span class="fstat-dot"></span>
+        <span>Total Kunjungan: <span class="fstat-val" id="statTotal">—</span></span>
+      </div>
+      <div class="fstat peak">
+        <span class="fstat-dot"></span>
+        <span>Peak: <span class="fstat-val" id="statPeak">—</span></span>
+      </div>
+    </div>
+
     <div class="footer-clock">
       <i class="fa-solid fa-calendar-days"></i>
       <span id="footerDate">—</span>
@@ -2846,6 +2879,32 @@
       console.error('Server info error:', e);
     }
   }
+
+  // ─── VISITOR STATS & HEARTBEAT ───────────────────────────────────────────
+  function formatNum(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000)    return (n / 1000).toFixed(1) + 'K';
+    return String(n);
+  }
+
+  async function fetchStats() {
+    try {
+      const res  = await fetch('/api/stats');
+      const data = await res.json();
+      const el = (id) => document.getElementById(id);
+      if (el('statOnline')) el('statOnline').textContent = formatNum(data.online);
+      if (el('statTotal'))  el('statTotal').textContent  = formatNum(data.total_visits);
+      if (el('statPeak'))   el('statPeak').textContent   = formatNum(data.peak_online);
+    } catch { /* silent */ }
+  }
+
+  async function sendHeartbeat() {
+    try { await fetch('/api/heartbeat', { method: 'POST' }); } catch { /* silent */ }
+  }
+
+  // Kirim heartbeat pertama langsung, lalu tiap 30 detik
+  sendHeartbeat().then(fetchStats);
+  setInterval(() => { sendHeartbeat().then(fetchStats); }, 30000);
 
   // ─── INIT ─────────────────────────────────────────────────────────────────
   (async function() {
