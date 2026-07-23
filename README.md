@@ -1,8 +1,24 @@
-# 📬 NovaMail — TempMail Web
+<div align="center">
 
-> Disposable email instan, tanpa daftar, real-time inbox. Powered by `tmail.etokom.com`.
+# 📬 NovaMail
 
-<p align="center">
+### TempMail instan dengan inbox real-time
+
+<p>
+  <strong>Buat email sekali pakai tanpa daftar, tanpa ribet, dan langsung siap digunakan.</strong>
+</p>
+
+<p>
+  <a href="https://github.com/hitlabmodv2/WEB_TempMail">
+    <img src="https://img.shields.io/github/stars/hitlabmodv2/WEB_TempMail?style=for-the-badge&logo=github&label=Stars" alt="GitHub stars" />
+  </a>
+  <a href="https://github.com/hitlabmodv2/WEB_TempMail">
+    <img src="https://img.shields.io/github/license/hitlabmodv2/WEB_TempMail?style=for-the-badge&label=License" alt="License" />
+  </a>
+  <img src="https://img.shields.io/badge/Node.js-24.x-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 24" />
+</p>
+
+<p>
   <a href="https://vercel.com/new/clone?repository-url=https://github.com/hitlabmodv2/WEB_TempMail">
     <img src="https://vercel.com/button" alt="Deploy with Vercel" />
   </a>
@@ -12,29 +28,51 @@
   </a>
 </p>
 
+<p>
+  <a href="#-fitur">Fitur</a> ·
+  <a href="#-jalankan-lokal">Jalankan Lokal</a> ·
+  <a href="#-api-endpoints">API</a> ·
+  <a href="#️-tech-stack">Tech Stack</a>
+</p>
+
+</div>
+
 ---
 
 ## ✨ Fitur
 
-- 📮 Email sekali pakai instan — tanpa daftar
-- 🔄 Auto-refresh inbox tiap 5 detik
-- 🌐 Domain default: `us.seebestdeals.com`
-- 📱 UI responsif (mobile + desktop)
-- 🎨 Dark mode modern
-- 📊 Server info & developer panel built-in
-- 📲 QR code untuk share email cepat
+<div align="center">
+
+| 📮 Email instan | 🔄 Inbox real-time | 🌐 Domain default |
+|:---:|:---:|:---:|
+| Tanpa registrasi | Auto-refresh 5 detik | `us.seebestdeals.com` |
+
+| 📱 Responsif | 🎨 Tampilan modern | 📲 QR Code |
+|:---:|:---:|:---:|
+| Mobile & desktop | Dark UI yang nyaman | Share email dengan cepat |
+
+</div>
 
 ---
 
 ## 🚀 Deploy
 
-### Vercel (1-klik)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/hitlabmodv2/WEB_TempMail)
+<div align="center">
 
-### Netlify (1-klik)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/hitlabmodv2/WEB_TempMail)
+### Deploy sekali klik
+
+<a href="https://vercel.com/new/clone?repository-url=https://github.com/hitlabmodv2/WEB_TempMail">
+  <img src="https://vercel.com/button" alt="Deploy with Vercel" />
+</a>
+&nbsp;
+<a href="https://app.netlify.com/start/deploy?repository=https://github.com/hitlabmodv2/WEB_TempMail">
+  <img src="https://www.netlify.com/img/deploy/button.svg" alt="Deploy to Netlify" />
+</a>
+
+</div>
 
 ### Docker
+
 ```bash
 docker build -t novamail .
 docker run -p 5000:5000 novamail
@@ -51,21 +89,21 @@ npm install
 npm start
 ```
 
-Buka http://localhost:5000
+Buka [`http://localhost:5000`](http://localhost:5000) di browser.
 
 ---
 
 ## 📂 Struktur Proyek
 
-```
+```text
 .
-├── public/index.html       # Frontend (single-file UI)
+├── public/index.html       # Frontend single-file
 ├── server.js               # Server Express utama
 ├── src/scrape/scraper.js   # Logic scraper TempMail
-├── api/index.js            # Entry serverless (Vercel/Netlify)
+├── api/index.js            # Entry serverless Vercel
 ├── netlify/functions/      # Netlify function wrapper
-├── vercel.json             # Config Vercel
-├── netlify.toml            # Config Netlify
+├── vercel.json             # Konfigurasi Vercel
+├── netlify.toml            # Konfigurasi Netlify
 └── Dockerfile              # Container build
 ```
 
@@ -73,26 +111,32 @@ Buka http://localhost:5000
 
 ## 🔌 API Endpoints
 
-| Method | Path | Deskripsi |
-|--------|------|-----------|
-| `GET`  | `/api/messages`     | Ambil email aktif + isi inbox |
-| `POST` | `/api/delete`       | Hapus email (auto buat baru) |
-| `POST` | `/api/change`       | Ganti email (`{ name, domain }`) |
-| `GET`  | `/api/view/:id`     | Baca isi pesan |
-| `GET`  | `/api/reset`        | Reset session, dapat email baru |
-| `GET`  | `/api/server-info`  | Info server runtime |
+| Method | Endpoint | Deskripsi |
+|:---:|---|---|
+| `GET` | `/api/messages` | Ambil email aktif dan isi inbox |
+| `POST` | `/api/delete` | Hapus email dan buat email baru |
+| `POST` | `/api/change` | Ganti nama email; domain tetap `us.seebestdeals.com` |
+| `GET` | `/api/view/:id` | Baca isi pesan tertentu |
+| `GET` | `/api/reset` | Reset session dan dapatkan email baru |
+| `GET` | `/api/server-info` | Lihat informasi runtime server |
 
 ---
 
 ## ⚙️ Tech Stack
 
-- **Backend** — Node.js + Express
-- **Scraping** — Axios (session + CSRF based)
-- **Frontend** — HTML/CSS/JS vanilla, FontAwesome, Inter font
-- **Session** — `express-session` (in-memory)
+<div align="center">
+
+| Bagian | Teknologi |
+|:---:|---|
+| **Backend** | Node.js 24.x + Express |
+| **Scraping** | Axios dengan session dan CSRF |
+| **Frontend** | HTML, CSS, JavaScript vanilla, FontAwesome, Inter |
+| **Session** | `express-session` in-memory |
+
+</div>
 
 ---
 
 ## 📝 Lisensi
 
-MIT — bebas dipakai & dimodifikasi.
+NovaMail dirilis di bawah lisensi **MIT** — bebas digunakan dan dimodifikasi.
