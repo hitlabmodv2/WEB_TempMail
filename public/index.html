@@ -8,8 +8,6 @@
   <link rel="apple-touch-icon" href="/icon/favicon.png" />
   <link rel="shortcut icon" type="image/png" href="/icon/favicon.png" />
   <meta name="theme-color" content="#3d8bff" />
-  <!-- Apply saved theme BEFORE render — cegah flash putih/hitam -->
-  <script>if(localStorage.getItem('nm-theme')==='light')document.documentElement.classList.add('light');</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -73,67 +71,6 @@
     body.tod-evening { --time-bg: url('/bg/evening.png'); }
     body.tod-night   { --time-bg: url('/bg/night.png'); }
 
-    /* ─── LIGHT MODE overrides ─── */
-    html.light {
-      --bg: #eef2f7;
-      --bg2: #f8fafc;
-      --card: #ffffff;
-      --card2: #f1f5fb;
-      --border: #cbd5e1;
-      --accent-glow: rgba(61,139,255,0.1);
-      --text: #0f172a;
-      --text2: #475569;
-      --text3: #94a3b8;
-      --shadow: 0 8px 32px rgba(0,0,0,0.12);
-    }
-    html.light body { background: var(--bg); }
-    html.light body::after {
-      background: linear-gradient(180deg, rgba(238,242,247,0.85) 0%, rgba(238,242,247,0.93) 100%);
-    }
-    html.light .navbar {
-      background: rgba(248,250,252,0.95);
-      border-bottom-color: var(--border);
-    }
-    html.light ::-webkit-scrollbar-track { background: var(--bg2); }
-    html.light ::-webkit-scrollbar-thumb { background: var(--border); }
-
-    /* ─── THEME TOGGLE BUTTON ─── */
-    .theme-toggle {
-      position: fixed;
-      bottom: 28px;
-      left: 22px;
-      z-index: 300;
-      width: 46px;
-      height: 46px;
-      border-radius: 50%;
-      border: 1.5px solid var(--border);
-      background: var(--card);
-      color: var(--text2);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      box-shadow: var(--shadow);
-      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-    }
-    .theme-toggle:hover {
-      background: var(--card2);
-      color: var(--accent);
-      border-color: var(--accent);
-      transform: scale(1.1);
-      box-shadow: 0 6px 24px rgba(61,139,255,0.3);
-    }
-    /* mobile — mirror posisi dengan FAB (right:12, bottom:18) */
-    @media (max-width: 600px) {
-      .theme-toggle {
-        bottom: 18px;
-        left: 12px;
-        width: 42px;
-        height: 42px;
-        font-size: 0.92rem;
-      }
-    }
     @media (max-width: 768px) {
       body::before { background-position: center top; }
     }
@@ -2216,11 +2153,6 @@
 
 
 <!-- Floating Action Buttons -->
-<!-- ─── THEME TOGGLE ─── -->
-<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Switch to light mode" aria-label="Toggle dark/light mode">
-  <i class="fa-solid fa-moon" id="themeIcon"></i>
-</button>
-
 <div class="fab-corner" id="fabCorner">
   <button class="fab-btn fab-top" id="fabScrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Scroll ke Atas">
     <i class="fa-solid fa-arrow-up"></i>
@@ -2266,31 +2198,6 @@
   }
 
   function goBack() { showPanel('tempmail'); }
-
-  // ─── DARK / LIGHT MODE ────────────────────────────────────────────────────
-  function toggleTheme() {
-    const isLight = document.documentElement.classList.toggle('light');
-    const icon = document.getElementById('themeIcon');
-    const btn  = document.getElementById('themeToggle');
-    if (isLight) {
-      icon.className = 'fa-solid fa-sun';
-      btn.title = 'Switch to dark mode';
-    } else {
-      icon.className = 'fa-solid fa-moon';
-      btn.title = 'Switch to light mode';
-    }
-    localStorage.setItem('nm-theme', isLight ? 'light' : 'dark');
-    showToast(isLight ? '☀️ Light mode aktif' : '🌙 Dark mode aktif', 'success');
-  }
-  // Sinkronisasi ikon sesuai preferensi yang sudah di-apply dari <head>
-  (function() {
-    if (document.documentElement.classList.contains('light')) {
-      const icon = document.getElementById('themeIcon');
-      const btn  = document.getElementById('themeToggle');
-      if (icon) icon.className = 'fa-solid fa-sun';
-      if (btn)  btn.title = 'Switch to dark mode';
-    }
-  })();
 
   // ─── FAB: scroll-to-top + back button ─────────────────────────────────────
   function updateFAB() {
@@ -2651,11 +2558,11 @@
   document.addEventListener('click', unlockAudio, { once: true });
   document.addEventListener('touchstart', unlockAudio, { once: true });
 
-  function playNotificationSound() {
+  async function playNotificationSound() {
     if (!soundEnabled) return;
     try {
       const ctx = getAudioCtx();
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state === 'suspended') await ctx.resume();
       const now = ctx.currentTime;
 
       // Two-tone soft chime (pleasant, not robotic)
@@ -2670,9 +2577,9 @@
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
         osc.start(t); osc.stop(t + 0.65);
       }
-      chime(1047, now, 0.18);       // C6
+      chime(1047, now, 0.18);        // C6
       chime(1319, now + 0.18, 0.15); // E6
-    } catch(e) { console.log('Sound error:', e.message); }
+    } catch(e) { console.warn('Sound error:', e.message); }
   }
 
   // Notif animasi waifu/alisa sudah dinonaktifkan sesuai permintaan
