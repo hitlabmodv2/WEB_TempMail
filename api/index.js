@@ -7,6 +7,9 @@ const TMailScraper = require('../src/scrape/scraper');
 const app = express();
 const FORCED_DOMAIN = 'us.seebestdeals.com';
 
+// ── Waktu start instance — untuk webUptime ─────────────────────────────────
+const _instanceStart = Date.now();
+
 // ── Stats in-memory (persists dalam satu warm instance Vercel) ─────────────
 let siteStats = { total_visits: 0, peak_online: 0 };
 const onlineMap = new Map();
@@ -207,6 +210,7 @@ app.get('/api/server-info', (req, res) => {
       env: process.env.NODE_ENV || 'production',
       port: process.env.PORT || 'N/A',
     },
+    webUptime: fmt(Math.floor((Date.now() - _instanceStart) / 1000)),
     app: {
       activeSessions: scraperStore.size,
       totalSessionsCreated: scraperStore.size,
