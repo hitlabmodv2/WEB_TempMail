@@ -482,7 +482,7 @@
     .status-bar.success { background: rgba(34,197,94,0.1); color: var(--green); }
     .status-bar.error { background: rgba(239,68,68,0.1); color: var(--red); }
     .status-bar.hidden { display: none; }
-    .spinner { width: 13px; height: 13px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+    .spinner { width: 13px; height: 13px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; will-change: transform; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ─── INBOX ─── */
@@ -518,7 +518,7 @@
 
     /* ─── REFRESH INDICATOR ─── */
     .refresh-indicator { display: flex; align-items: center; gap: 6px; font-size: 0.73rem; color: var(--text3); }
-    .refresh-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s ease-in-out infinite; }
+    .refresh-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s ease-in-out infinite; will-change: transform, opacity; }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
 
     /* ─── SERVER INFO PANEL ─── */
@@ -756,7 +756,7 @@
       background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3);
       color: var(--green); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
     }
-    .online-badge .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse-dot 1.5s infinite; }
+    .online-badge .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse-dot 1.5s infinite; will-change: transform, opacity; }
 
     /* ─── SPOILER ─── */
     .spoiler-wrap { margin-top: 16px; }
@@ -811,12 +811,14 @@
       -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: destination-out; mask-composite: exclude;
       animation: ring-spin 4s linear infinite;
+      will-change: transform;
     }
     @keyframes ring-spin { to { transform: rotate(360deg); } }
     .dev-avatar-pulse {
       position: absolute; inset: -12px; border-radius: 50%;
       background: rgba(61,139,255,0.15);
       animation: pulse-ring 2.5s ease-out infinite;
+      will-change: transform, opacity;
     }
     @keyframes pulse-ring {
       0% { transform: scale(0.9); opacity: 0.6; }
@@ -1054,7 +1056,7 @@
       font-size: 0.75rem; font-weight: 600; color: var(--text2);
     }
     .fstat .fstat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .fstat.online  .fstat-dot { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse-dot 1.5s infinite; }
+    .fstat.online  .fstat-dot { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse-dot 1.5s infinite; will-change: transform, opacity; }
     .fstat.total   .fstat-dot { background: var(--accent); }
     .fstat.peak    .fstat-dot { background: var(--yellow); }
     .fstat-val { color: var(--text); font-weight: 700; }
@@ -1306,8 +1308,14 @@
       flex-direction: column;
       align-items: center;
       pointer-events: none;
-      filter: drop-shadow(0 12px 40px rgba(108,99,255,0.55));
+      /* filter di sini pindah ke inner SVG — container pakai GPU layer sendiri */
+      will-change: transform;
+      transform: translateZ(0);
+      isolation: isolate;
+      contain: layout style;
     }
+    /* Drop shadow di inner SVG, bukan container — isolasi compositing */
+    #waifu-svg { filter: drop-shadow(0 8px 24px rgba(108,99,255,0.45)); }
     #waifu-container.waifu-show {
       animation: waifu-slide-up 0.65s cubic-bezier(0.34,1.56,0.64,1) forwards,
                  waifu-slide-down 0.5s ease-in 4.6s forwards;
@@ -1371,6 +1379,7 @@
     /* Character sway */
     #waifu-svg {
       transform-origin: bottom center;
+      will-change: transform;
     }
     #waifu-container.waifu-show #waifu-svg {
       animation: waifu-sway 2.2s ease-in-out infinite;
@@ -1383,6 +1392,7 @@
     /* Arm wave */
     .waifu-arm-wave {
       transform-origin: 108px 138px;
+      will-change: transform;
     }
     #waifu-container.waifu-show .waifu-arm-wave {
       animation: arm-wave 0.45s ease-in-out infinite alternate;
@@ -1397,6 +1407,7 @@
       position: absolute;
       pointer-events: none;
       font-size: 14px;
+      will-change: transform, opacity;
     }
     #waifu-container.waifu-show .waifu-star {
       animation: star-float 1.8s ease-out infinite;
@@ -1425,10 +1436,15 @@
       flex-direction: row;
       align-items: flex-end;
       pointer-events: none;
-      filter: drop-shadow(0 12px 40px rgba(220,38,38,0.5));
       gap: 10px;
-      transform: translateX(calc(-100% - 60px));
+      transform: translateX(calc(-100% - 60px)) translateZ(0);
+      /* GPU layer sendiri — filter TIDAK di sini */
+      will-change: transform;
+      isolation: isolate;
+      contain: layout style;
     }
+    /* Drop shadow di inner SVG saja */
+    #alisa-svg { filter: drop-shadow(0 8px 24px rgba(220,38,38,0.4)); }
     #alisa-container.alisa-show {
       animation: alisa-slide-in 0.65s cubic-bezier(0.34,1.56,0.64,1) forwards,
                  alisa-slide-out 0.5s ease-in 4.6s forwards;
@@ -1494,6 +1510,7 @@
     /* Alisa character sway */
     #alisa-svg {
       transform-origin: bottom center;
+      will-change: transform;
     }
     #alisa-container.alisa-show #alisa-svg {
       animation: alisa-sway 2.4s ease-in-out infinite;
@@ -1506,6 +1523,7 @@
     /* Alisa arm idle */
     .alisa-arm-raise {
       transform-origin: 44px 138px;
+      will-change: transform;
     }
     #alisa-container.alisa-show .alisa-arm-raise {
       animation: alisa-arm 3s ease-in-out infinite alternate;
@@ -1521,7 +1539,7 @@
     }
     @keyframes halo-glow {
       from { opacity: 0.75; }
-      to   { opacity: 1; filter: drop-shadow(0 0 6px #fbbf24); }
+      to   { opacity: 1; }
     }
 
     /* Alisa sparkles — red/cross theme */
@@ -1529,6 +1547,7 @@
       position: absolute;
       pointer-events: none;
       font-size: 13px;
+      will-change: transform, opacity;
     }
     #alisa-container.alisa-show .alisa-star {
       animation: alisa-star-float 2s ease-out infinite;
