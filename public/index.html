@@ -2661,8 +2661,25 @@
       if (data.success && data.data) {
         const mailbox = data.data.mailbox;
         const messages = data.data.messages || [];
-        if (!currentEmail && mailbox) { setStatus('success','Email ready — auto-refreshing every 5 seconds'); showToast('Email address generated!','success'); }
-        if (mailbox && mailbox !== currentEmail) { currentEmail = mailbox; document.getElementById('emailDisplay').value = currentEmail; }
+        if (mailbox && mailbox !== currentEmail) {
+          const prevEmail = localStorage.getItem('nm-email');
+          const isNew = !prevEmail || prevEmail !== mailbox;
+          currentEmail = mailbox;
+          document.getElementById('emailDisplay').value = currentEmail;
+          localStorage.setItem('nm-email', mailbox);
+          if (!prevEmail) {
+            // Pertama kali buka — email baru
+            setStatus('success','Email ready — auto-refreshing every 5 seconds');
+            showToast('Email address generated!','success');
+          } else if (isNew) {
+            // Email berubah (misal setelah server restart atau delete)
+            setStatus('success','Email ready — auto-refreshing every 5 seconds');
+            showToast('New email address assigned!','success');
+          } else {
+            // Refresh biasa — email sama, tidak perlu toast
+            setStatus('success', `Inbox synced — ${(currentMessages||[]).length} message(s)`);
+          }
+        }
         const prev = currentMessages.length;
         currentMessages = messages;
         renderInbox(messages);

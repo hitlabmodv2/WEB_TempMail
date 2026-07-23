@@ -113,16 +113,30 @@ function randomName(len = 7) {
 
 app.get('/api/messages', async (req, res) => {
   try {
+    const isNewScraper = !scraperStore.has(req.session.id);
     const scraper = getScraperForSession(req.session.id);
     let result = await scraper.getMessages();
 
-    // Paksa domain us.seebestdeals.com — jika API assign domain lain, langsung change
     if (result.success && result.data && result.data.mailbox) {
       const mailbox = result.data.mailbox;
-      if (!mailbox.endsWith('@' + FORCED_DOMAIN)) {
+
+      // Jika scraper baru (server restart) dan session punya email tersimpan → restore
+      if (isNewScraper && req.session.savedEmail && req.session.savedEmail !== mailbox) {
+        const [savedName] = req.session.savedEmail.split('@');
+        const restored = await scraper.changeEmail(savedName, FORCED_DOMAIN);
+        if (restored.success) {
+          result = { success: true, data: restored.data };
+        }
+      } else if (!mailbox.endsWith('@' + FORCED_DOMAIN)) {
+        // Paksa domain us.seebestdeals.com
         const changed = await scraper.changeEmail(randomName(), FORCED_DOMAIN);
         if (changed.success) result = { success: true, data: changed.data };
       }
+    }
+
+    // Simpan email aktif ke session supaya bisa di-restore setelah restart
+    if (result.success && result.data && result.data.mailbox) {
+      req.session.savedEmail = result.data.mailbox;
     }
 
     res.json(result);
