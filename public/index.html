@@ -2954,12 +2954,39 @@
 
   // ─── OTP DETECTOR ────────────────────────────────────────────────────────
   function extractOTPs(html, subject) {
-    const combined = ((subject || '') + ' ' + (html || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ');
-    const raw = combined.match(/\b\d{4,8}\b/g) || [];
-    // Filter: angka tahun (1900-2099), dan angka umum yang bukan OTP
-    return [...new Set(raw)].filter(n => {
+    // Strip tags, then strip URLs so we don't harvest numbers from links
+    let text = ((subject || '') + ' ' + (html || '').replace(/<[^>]+>/g, ' '));
+    text = text.replace(/https?:\/\/\S+/gi, ' ').replace(/\s+/g, ' ');
+
+    // Look for numbers that appear near OTP-related keywords (within ~80 chars)
+    const otpKeywords = /(?:code|kode|otp|token|verif|pin|password sementara|konfirmasi|aktivasi|one.time|passcode)/i;
+    const segments = text.split(/(?<=[.!?\n])/);
+    const hits = new Set();
+
+    // Pass 1: numbers in segments that contain OTP keywords
+    segments.forEach(seg => {
+      if (otpKeywords.test(seg)) {
+        (seg.match(/\b\d{4,8}\b/g) || []).forEach(n => hits.add(n));
+      }
+    });
+
+    // Pass 2: if nothing found yet, try the whole text (less strict)
+    if (hits.size === 0) {
+      // Find numbers that are close (<=120 chars) to an OTP keyword
+      const combined = text;
+      const kwMatch = [...combined.matchAll(new RegExp(otpKeywords.source, 'gi'))];
+      kwMatch.forEach(m => {
+        const snippet = combined.slice(Math.max(0, m.index - 120), m.index + 120);
+        (snippet.match(/\b\d{4,8}\b/g) || []).forEach(n => hits.add(n));
+      });
+    }
+
+    // Filter: no years, no port-like numbers, minimum 4 digits
+    return [...hits].filter(n => {
       const num = parseInt(n, 10);
-      return !(num >= 1900 && num <= 2099) && n.length >= 4;
+      if (num >= 1900 && num <= 2099) return false; // tahun
+      if ([80, 443, 3000, 3306, 5000, 5432, 8080, 8443].includes(num)) return false; // port umum
+      return n.length >= 4;
     }).slice(0, 5);
   }
   function buildOTPBar(codes) {
@@ -3177,93 +3204,29 @@
         const finalFrom = apiFrom || (cached && (cached.from_name || cached.from)) || '';
         const finalDate = apiDate || (cached && fmtDate(cached.created_at || cached.date)) || '';
         applyMeta(finalSubj, finalFrom, finalDate);
-        // Body — inject dark CSS + JS into email HTML
+        // Body — tampilkan email dengan warna aslinya (background putih agar teks tetap terbaca)
         if (data.body) {
-          const darkInject = `
-<style>
-  html,body{background:#131929!important;color:#e8edf5!important;margin:0;padding:0;}
-  *{color-scheme:dark;}
-  body{padding:16px!important;font-family:'Inter',Arial,sans-serif!important;font-size:14px!important;line-height:1.6!important;}
-  /* link biasa biru, link-button (punya background) teks putih */
-  a:not([style*="background"]):not([style*="background-color"]){color:#3d8bff!important;}
-  a[style*="background"],a[style*="background-color"]{color:#fff!important;opacity:1!important;}
-  img{max-width:100%!important;height:auto!important;}
-  /* override semua warna teks gelap jadi terang */
-  p,span,div,td,th,li,h1,h2,h3,h4,h5,h6{color:#e8edf5!important;}
-  /* tabel & border */
-  table,td,th{border-color:#1e2d47!important;}
-  /* override background putih dari inline style */
-  [style*="background:#fff"],[style*="background: #fff"],
-  [style*="background:#FFF"],[style*="background: #FFF"],
-  [style*="background:#ffffff"],[style*="background: #ffffff"],
-  [style*="background:#FFFFFF"],[style*="background: #FFFFFF"],
-  [style*="background:white"],[style*="background: white"],
-  [style*="background:White"],[style*="background: White"],
-  [style*="background-color:#fff"],[style*="background-color: #fff"],
-  [style*="background-color:#ffffff"],[style*="background-color: #ffffff"],
-  [style*="background-color:#FFFFFF"],[style*="background-color: #FFFFFF"],
-  [style*="background-color:white"],[style*="background-color: white"],
-  [style*="background-color:rgb(255,255,255)"],[style*="background-color: rgb(255, 255, 255)"]
-  {background:#1a2236!important;background-color:#1a2236!important;}
-  /* override bgcolor attribute */
-  [bgcolor="ffffff"],[bgcolor="#ffffff"],[bgcolor="FFFFFF"],[bgcolor="#FFFFFF"],
-  [bgcolor="fff"],[bgcolor="#fff"],[bgcolor="white"],[bgcolor="White"],[bgcolor="WHITE"]
-  {background-color:#1a2236!important;}
-  /* elemen yang sering jadi container email */
-  center,table[width],[align="center"]{background:#131929!important;}
-  /* tombol/CTA tetap terlihat */
-  /* handled above — a[style*="background"] sudah dapat color:white */
-</style>
-<script>
-(function(){
-  function darkify(){
-    // Override semua bgcolor attribute
-    document.querySelectorAll('[bgcolor]').forEach(function(el){
-      el.style.backgroundColor='#131929';
-    });
-    // Override inline background-color putih
-    document.querySelectorAll('*').forEach(function(el){
-      var s=el.style;
-      if(!s) return;
-      var bg=(s.backgroundColor||'').toLowerCase().replace(/\s/g,'');
-      if(bg==='rgb(255,255,255)'||bg==='rgba(255,255,255,1)'||bg==='#ffffff'||bg==='#fff'||bg==='white'){
-        s.backgroundColor='#1a2236';
-      }
-      var bg2=(s.background||'').toLowerCase();
-      if(bg2.startsWith('#fff')||bg2.startsWith('white')||bg2.startsWith('rgb(255,255,255')){
-        s.background='#1a2236';
-      }
-    });
-    // Body wajib gelap
-    if(document.body){
-      document.body.style.backgroundColor='#131929';
-      document.body.style.color='#e8edf5';
-    }
-    if(document.documentElement){
-      document.documentElement.style.backgroundColor='#131929';
-    }
-  }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',darkify);
-  } else { darkify(); }
-})();
-<\/script>`;
-          // Inject sebelum </head>; kalau tidak ada head, tambah di awal
-          let darkBody = data.body;
-          if (/<\/head>/i.test(darkBody)) {
-            darkBody = darkBody.replace(/<\/head>/i, darkInject + '</head>');
-          } else if (/<body/i.test(darkBody)) {
-            darkBody = darkBody.replace(/<body/i, darkInject + '<body');
+          // Inject minimal CSS: pastikan body punya background putih & teks gelap
+          const safeInject = `<style>
+html,body{background:#ffffff!important;color:#1a1a1a!important;margin:0;padding:12px!important;font-family:'Inter',Arial,sans-serif!important;font-size:14px!important;line-height:1.6!important;}
+img{max-width:100%!important;height:auto!important;}
+a{color:#1a6ed8!important;}
+</style>`;
+          let safeBody = data.body;
+          if (/<\/head>/i.test(safeBody)) {
+            safeBody = safeBody.replace(/<\/head>/i, safeInject + '</head>');
+          } else if (/<body/i.test(safeBody)) {
+            safeBody = safeBody.replace(/<body/i, safeInject + '<body');
           } else {
-            darkBody = darkInject + darkBody;
+            safeBody = safeInject + safeBody;
           }
-          const blob = new Blob([darkBody], {type:'text/html'});
+          const blob = new Blob([safeBody], {type:'text/html'});
           const url = URL.createObjectURL(blob);
           // OTP detection dari body + subject
           const _otpCodes = extractOTPs(data.body, finalSubj);
           const _otpBar   = buildOTPBar(_otpCodes);
           document.getElementById('viewerBody').innerHTML =
-            _otpBar + `<div class="email-wrap"><iframe src="${url}" style="width:100%;min-height:420px;border:none;" onload="this.style.height=(this.contentWindow.document.body.scrollHeight+32)+'px'"></iframe></div>`;
+            _otpBar + `<div class="email-wrap" style="background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid var(--border);"><iframe src="${url}" style="width:100%;min-height:420px;border:none;background:#ffffff;" onload="this.style.height=(this.contentWindow.document.body.scrollHeight+32)+'px'"></iframe></div>`;
         } else {
           document.getElementById('viewerBody').innerHTML = `<div style="color:var(--text2);padding:12px;">(Tidak ada konten)</div>`;
         }
