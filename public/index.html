@@ -77,13 +77,13 @@
       transform: translateZ(0);
       backface-visibility: hidden;
     }
-    /* Overlay tipis — biar teks tetap kebaca tanpa nutup background */
+    /* Overlay — cukup gelap biar teks terbaca, tidak nutup background sepenuhnya */
     body::after {
       content: '';
       position: fixed;
       inset: 0;
       z-index: -1;
-      background: rgba(10, 14, 26, 0.45);
+      background: rgba(10, 14, 26, 0.62);
       pointer-events: none;
       /* GPU compositing layer */
       will-change: transform;
@@ -131,20 +131,25 @@
     .hero {
       text-align: center; padding: 56px 20px 32px; position: relative; overflow: hidden;
     }
+    /* Gradien lokal di belakang area teks hero — biar teks selalu kebaca */
     .hero::before {
-      content: ''; position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
-      width: 700px; height: 400px;
-      background: radial-gradient(ellipse, rgba(61,139,255,0.12) 0%, transparent 70%);
-      pointer-events: none;
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 70% at 50% 0%, rgba(10,14,26,0.72) 0%, transparent 100%),
+        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(10,14,26,0.55) 0%, transparent 100%);
+      pointer-events: none; z-index: 0;
     }
+    /* Pastikan konten hero selalu di atas pseudo-element */
+    .hero > * { position: relative; z-index: 1; }
     .hero-badge {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 6px 14px; margin-bottom: 18px;
-      background: rgba(61,139,255,0.1);
-      border: 1px solid rgba(61,139,255,0.3);
+      background: rgba(61,139,255,0.15);
+      border: 1px solid rgba(61,139,255,0.45);
       border-radius: 50px;
       font-size: 0.72rem; font-weight: 600; color: var(--accent);
       letter-spacing: 0.5px; text-transform: uppercase;
+      backdrop-filter: blur(4px);
     }
     .hero-badge .pulse-mini {
       width: 6px; height: 6px; background: var(--green); border-radius: 50%;
@@ -159,34 +164,43 @@
       line-height: 1.15;
       letter-spacing: -0.02em;
       margin-bottom: 16px;
+      filter: drop-shadow(0 2px 12px rgba(0,0,0,0.6));
     }
     .hero h1 .accent-word {
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .hero p {
-      color: var(--text2);
-      font-size: 0.95rem;
+      color: #d8e4f5;
+      font-size: 0.97rem;
       max-width: 520px;
       margin: 0 auto;
-      line-height: 1.65;
-      font-weight: 400;
+      line-height: 1.7;
+      font-weight: 500;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.7), 0 0 24px rgba(0,0,0,0.5);
     }
+    .hero p strong { color: #fff; font-weight: 700; }
     .hero-features {
       display: inline-flex; flex-wrap: wrap; justify-content: center;
-      gap: 8px 18px; margin-top: 18px;
+      gap: 8px; margin-top: 20px;
     }
     .hero-feature {
       display: inline-flex; align-items: center; gap: 6px;
-      font-size: 0.78rem; color: var(--text2); font-weight: 500;
+      font-size: 0.78rem; color: #e2ecff; font-weight: 600;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 50px;
+      padding: 5px 12px;
+      backdrop-filter: blur(6px);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
     }
-    .hero-feature i { color: var(--green); font-size: 0.75rem; }
+    .hero-feature i { color: #4ade80; font-size: 0.72rem; filter: drop-shadow(0 0 4px rgba(74,222,128,0.6)); }
     @media (max-width: 600px) {
-      .hero { padding: 40px 18px 24px; }
-      .hero h1 { font-size: clamp(1.7rem, 7vw, 2.2rem); }
+      .hero { padding: 40px 16px 24px; }
+      .hero h1 { font-size: clamp(1.65rem, 7vw, 2.2rem); }
       .hero p { font-size: 0.88rem; }
-      .hero-features { gap: 6px 12px; margin-top: 14px; }
-      .hero-feature { font-size: 0.72rem; }
+      .hero-features { gap: 6px; margin-top: 16px; }
+      .hero-feature { font-size: 0.71rem; padding: 4px 10px; }
     }
 
     /* ─── TAB NAV ─── */
@@ -504,6 +518,47 @@
     .inbox-subject { font-size: 0.77rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
     .inbox-meta { font-size: 0.7rem; color: var(--text3); flex-shrink: 0; text-align: right; }
     .badge-new { display: inline-flex; background: var(--accent); color: #fff; font-size: 0.62rem; font-weight: 700; padding: 2px 6px; border-radius: 20px; margin-top: 4px; letter-spacing: 0.5px; }
+
+    /* ─── SKELETON LOADING ─── */
+    @keyframes sk-shine {
+      0%   { background-position: -200% 0; }
+      100% { background-position:  200% 0; }
+    }
+    .skeleton-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 20px; border-bottom: 1px solid var(--border);
+      pointer-events: none;
+    }
+    .skeleton-item:last-child { border-bottom: none; }
+    .sk {
+      background: linear-gradient(90deg, var(--card2) 25%, rgba(255,255,255,0.04) 50%, var(--card2) 75%);
+      background-size: 200% 100%;
+      animation: sk-shine 1.4s ease-in-out infinite;
+      border-radius: 6px; flex-shrink: 0;
+    }
+    .sk-avatar { width: 36px; height: 36px; border-radius: 50%; }
+    .sk-line   { height: 11px; }
+
+    /* ─── OTP BAR ─── */
+    .otp-bar {
+      padding: 10px 16px 4px; display: flex; flex-wrap: wrap;
+      gap: 8px; align-items: center; border-bottom: 1px solid var(--border);
+    }
+    .otp-label {
+      font-size: 0.68rem; color: var(--text3); font-weight: 700;
+      letter-spacing: 0.8px; text-transform: uppercase;
+    }
+    .otp-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(61,139,255,0.12); border: 1px solid rgba(61,139,255,0.35);
+      border-radius: 8px; padding: 5px 13px; cursor: pointer;
+      font-size: 0.92rem; font-weight: 700; color: var(--accent);
+      font-family: 'JetBrains Mono', 'Fira Mono', monospace;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+      letter-spacing: 2px;
+    }
+    .otp-pill:hover { background: rgba(61,139,255,0.22); border-color: rgba(61,139,255,0.55); }
+    .otp-pill.copied { background: rgba(34,197,94,0.15)!important; border-color: rgba(34,197,94,0.4)!important; color: var(--green)!important; }
 
     /* ─── EMAIL VIEWER ─── */
     .email-viewer { display: none; }
@@ -2753,7 +2808,9 @@
       inbox.innerHTML = `<div class="inbox-empty"><i class="fa-regular fa-envelope-open"></i><p>Your inbox is empty.<br><span style="font-size:0.76rem;">Emails will appear here in real-time.</span></p></div>`;
       return;
     }
+    const unread = messages.filter(m => !m.is_seen).length;
     count.textContent = messages.length;
+    updateFaviconBadge(unread);
     inbox.innerHTML = `<div class="inbox-list">${messages.map(msg => {
       const rawFrom = msg.from_name || msg.from || '';
       const init = rawFrom ? rawFrom.charAt(0).toUpperCase() : '?';
@@ -2834,6 +2891,94 @@
   function showAlisaNotif() {}
   function showWaifuNotif() {}
 
+  // ─── FAVICON BADGE ───────────────────────────────────────────────────────
+  let _fvCanvas = null, _fvCtx = null, _fvImg = null, _fvLoaded = false;
+  function _initFavicon() {
+    if (_fvCanvas) return;
+    _fvCanvas = document.createElement('canvas');
+    _fvCanvas.width = 32; _fvCanvas.height = 32;
+    _fvCtx = _fvCanvas.getContext('2d');
+    _fvImg = new Image();
+    _fvImg.crossOrigin = 'anonymous';
+    _fvImg.onload = () => { _fvLoaded = true; };
+    _fvImg.src = '/icon/favicon.png';
+  }
+  function updateFaviconBadge(count) {
+    _initFavicon();
+    const draw = () => {
+      _fvCtx.clearRect(0, 0, 32, 32);
+      try { _fvCtx.drawImage(_fvImg, 0, 0, 32, 32); } catch {}
+      if (count > 0) {
+        const label = count > 99 ? '99+' : String(count);
+        const fontSize = label.length > 2 ? 8 : 10;
+        const r = label.length > 2 ? 10 : 9;
+        const x = 32 - r, y = r;
+        _fvCtx.beginPath();
+        _fvCtx.arc(x, y, r, 0, 2 * Math.PI);
+        _fvCtx.fillStyle = '#ef4444';
+        _fvCtx.fill();
+        _fvCtx.fillStyle = '#fff';
+        _fvCtx.font = `bold ${fontSize}px Inter,Arial,sans-serif`;
+        _fvCtx.textAlign = 'center';
+        _fvCtx.textBaseline = 'middle';
+        _fvCtx.fillText(label, x, y + 0.5);
+      }
+      const dataUrl = _fvCanvas.toDataURL('image/png');
+      document.querySelectorAll('link[rel*="icon"]').forEach(el => { el.href = dataUrl; });
+    };
+    if (_fvLoaded) draw(); else { const orig = _fvImg.onload; _fvImg.onload = () => { _fvLoaded = true; draw(); }; }
+  }
+
+  // ─── BROWSER NOTIFICATION ─────────────────────────────────────────────────
+  async function requestBrowserNotifPermission() {
+    if (!('Notification' in window) || Notification.permission !== 'default') return;
+    try { await Notification.requestPermission(); } catch {}
+  }
+  function sendBrowserNotif(count, subject) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    try {
+      const title = count > 1 ? `📬 ${count} email baru masuk!` : '📬 Email baru masuk!';
+      const n = new Notification(title, {
+        body: subject || 'Cek inbox NovaMail kamu',
+        icon: '/icon/favicon.png',
+        tag: 'novamail-inbox',
+        renotify: true,
+      });
+      n.onclick = () => { window.focus(); n.close(); };
+      setTimeout(() => n.close(), 7000);
+    } catch {}
+  }
+  // Minta permission pas interaksi pertama (tidak popup tiba-tiba)
+  document.addEventListener('click',      requestBrowserNotifPermission, { once: true });
+  document.addEventListener('touchstart', requestBrowserNotifPermission, { once: true });
+
+  // ─── OTP DETECTOR ────────────────────────────────────────────────────────
+  function extractOTPs(html, subject) {
+    const combined = ((subject || '') + ' ' + (html || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ');
+    const raw = combined.match(/\b\d{4,8}\b/g) || [];
+    // Filter: angka tahun (1900-2099), dan angka umum yang bukan OTP
+    return [...new Set(raw)].filter(n => {
+      const num = parseInt(n, 10);
+      return !(num >= 1900 && num <= 2099) && n.length >= 4;
+    }).slice(0, 5);
+  }
+  function buildOTPBar(codes) {
+    if (!codes.length) return '';
+    const pills = codes.map(code => `<button class="otp-pill" onclick="copyOTP('${code}',this)"><i class="fa-solid fa-copy" style="font-size:0.72rem;opacity:0.75;"></i>${code}</button>`).join('');
+    return `<div class="otp-bar"><span class="otp-label">🔢 Kode terdeteksi</span>${pills}</div>`;
+  }
+  function copyOTP(code, btn) {
+    navigator.clipboard.writeText(code).then(() => {
+      btn.classList.add('copied');
+      btn.innerHTML = `<i class="fa-solid fa-check" style="font-size:0.72rem;"></i>Disalin!`;
+      showToast('Kode ' + code + ' disalin! ✅', 'success');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<i class="fa-solid fa-copy" style="font-size:0.72rem;opacity:0.75;"></i>${code}`;
+      }, 2200);
+    }).catch(() => showToast('Gagal copy kode', 'error'));
+  }
+
   function toggleSound() {
     soundEnabled = !soundEnabled;
     const btn = document.getElementById('soundToggleBtn');
@@ -2864,8 +3009,22 @@
   // ─── FETCH MESSAGES ───────────────────────────────────────────────────────
   let currentEmail = '', currentMessages = [], countdown = 5;
 
+  function showInboxSkeleton() {
+    const inbox = document.getElementById('inboxContent');
+    if (!inbox) return;
+    inbox.innerHTML = Array(3).fill('').map(() => `
+      <div class="skeleton-item">
+        <div class="sk sk-avatar"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px;">
+          <div class="sk sk-line" style="width:72%;"></div>
+          <div class="sk sk-line" style="width:48%;"></div>
+        </div>
+        <div class="sk sk-line" style="width:36px;"></div>
+      </div>`).join('');
+  }
+
   async function fetchMessages(silent=false) {
-    if (!silent) setStatus('loading', 'Checking your inbox...');
+    if (!silent) { setStatus('loading', 'Checking your inbox...'); showInboxSkeleton(); }
     try {
       const res = await fetch('/api/messages');
       const data = await res.json();
@@ -2895,10 +3054,15 @@
         currentMessages = messages;
         renderInbox(messages);
         if (prev > 0 && messages.length > prev) {
+          const newCount = messages.length - prev;
           playNotificationSound();
-          showToast(`📬 ${messages.length - prev} new email(s) arrived!`, 'success');
-          showWaifuNotif(messages.length - prev);
+          showToast(`📬 ${newCount} email baru masuk!`, 'success');
+          sendBrowserNotif(newCount, messages[0]?.subject || null);
+          showWaifuNotif(newCount);
         }
+        // Favicon badge: unread count
+        const unreadCount = messages.filter(m => !m.is_seen).length;
+        updateFaviconBadge(unreadCount);
         if (!silent) setStatus('success', `Inbox synced — ${messages.length} message(s)`);
       } else {
         if (!silent) setStatus('error', data.error || 'Failed to load inbox');
@@ -2966,6 +3130,12 @@
     const viewer = document.getElementById('emailViewer');
     viewer.className = 'card email-viewer active';
     viewer.scrollIntoView({behavior:'smooth',block:'start'});
+    // Mark as read locally → update favicon badge
+    const msg = currentMessages.find(m => String(m.id) === String(id));
+    if (msg && !msg.is_seen) {
+      msg.is_seen = true;
+      updateFaviconBadge(currentMessages.filter(m => !m.is_seen).length);
+    }
 
     // ── Langkah 1: tampilkan data dari cache inbox SEGERA (tidak perlu tunggu API) ──
     const cached = currentMessages.find(m => String(m.id) === String(id));
@@ -3014,7 +3184,9 @@
   html,body{background:#131929!important;color:#e8edf5!important;margin:0;padding:0;}
   *{color-scheme:dark;}
   body{padding:16px!important;font-family:'Inter',Arial,sans-serif!important;font-size:14px!important;line-height:1.6!important;}
-  a{color:#3d8bff!important;}
+  /* link biasa biru, link-button (punya background) teks putih */
+  a:not([style*="background"]):not([style*="background-color"]){color:#3d8bff!important;}
+  a[style*="background"],a[style*="background-color"]{color:#fff!important;opacity:1!important;}
   img{max-width:100%!important;height:auto!important;}
   /* override semua warna teks gelap jadi terang */
   p,span,div,td,th,li,h1,h2,h3,h4,h5,h6{color:#e8edf5!important;}
@@ -3040,7 +3212,7 @@
   /* elemen yang sering jadi container email */
   center,table[width],[align="center"]{background:#131929!important;}
   /* tombol/CTA tetap terlihat */
-  a[style*="background"]{opacity:1!important;}
+  /* handled above — a[style*="background"] sudah dapat color:white */
 </style>
 <script>
 (function(){
@@ -3087,8 +3259,11 @@
           }
           const blob = new Blob([darkBody], {type:'text/html'});
           const url = URL.createObjectURL(blob);
+          // OTP detection dari body + subject
+          const _otpCodes = extractOTPs(data.body, finalSubj);
+          const _otpBar   = buildOTPBar(_otpCodes);
           document.getElementById('viewerBody').innerHTML =
-            `<div class="email-wrap"><iframe src="${url}" style="width:100%;min-height:420px;border:none;" onload="this.style.height=(this.contentWindow.document.body.scrollHeight+32)+'px'"></iframe></div>`;
+            _otpBar + `<div class="email-wrap"><iframe src="${url}" style="width:100%;min-height:420px;border:none;" onload="this.style.height=(this.contentWindow.document.body.scrollHeight+32)+'px'"></iframe></div>`;
         } else {
           document.getElementById('viewerBody').innerHTML = `<div style="color:var(--text2);padding:12px;">(Tidak ada konten)</div>`;
         }
@@ -3101,69 +3276,79 @@
   function closeViewer() { document.getElementById('emailViewer').className = 'card email-viewer'; }
 
   // ─── SERVER INFO ──────────────────────────────────────────────────────────
+  function _siSet(id, val, fb) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = (val !== undefined && val !== null && val !== '') ? val : (fb !== undefined ? fb : '—');
+  }
+  function _siHtml(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+  function _fmtUp(u) { return u ? `${u.days}d ${u.hours}h ${u.mins}m` : '—'; }
+
   async function loadServerInfo() {
     try {
       const res = await fetch('/api/server-info');
       const data = await res.json();
       if (!data.success) return;
 
-      const sys = data.system, m = data.memory, c = data.cpu, p = data.process, app = data.app;
+      const sys = data.system || {}, m = data.memory || {}, c = data.cpu || {},
+            p = data.process || {}, app = data.app || {};
 
       // ── Timestamp ──
-      document.getElementById('si-timestamp').textContent = 'Updated ' + new Date(data.timestamp).toLocaleTimeString();
+      _siSet('si-timestamp', 'Updated ' + new Date(data.timestamp).toLocaleTimeString());
 
       // ── RAM Card ──
-      document.getElementById('si-ram-used').textContent = m.used;
-      document.getElementById('si-ram-total').textContent = 'of ' + m.total;
-      document.getElementById('si-ram-bar').style.width = m.usedPercent + '%';
-      document.getElementById('si-ram-pct').textContent = m.usedPercent;
-      document.getElementById('si-ram-free').textContent = m.free;
+      _siSet('si-ram-used',  m.used);
+      _siSet('si-ram-total', m.total ? 'of ' + m.total : '—');
+      const ramBar = document.getElementById('si-ram-bar');
+      if (ramBar) ramBar.style.width = (m.usedPercent || 0) + '%';
+      _siSet('si-ram-pct',  m.usedPercent);
+      _siSet('si-ram-free', m.free);
 
       // ── CPU Card ──
-      document.getElementById('si-cpu-cores').textContent = c.cores;
-      document.getElementById('si-load1').textContent = c.loadAvg1;
-      document.getElementById('si-load5').textContent = c.loadAvg5;
-      document.getElementById('si-load15').textContent = c.loadAvg15;
+      _siSet('si-cpu-cores', c.cores);
+      _siSet('si-load1',     c.loadAvg1);
+      _siSet('si-load5',     c.loadAvg5);
+      _siSet('si-load15',    c.loadAvg15);
 
       // ── Uptime Card ──
       const wu = data.webUptime;
-      document.getElementById('si-uptime').textContent = `${wu.days}d ${wu.hours}h ${wu.mins}m`;
-      document.getElementById('si-uptime-sub').textContent = `${wu.secs}s — web berjalan`;
-      const ou = sys.osUptime;
-      document.getElementById('si-os-uptime').textContent = `${ou.days}d ${ou.hours}h ${ou.mins}m`;
+      _siSet('si-uptime',     _fmtUp(wu));
+      _siSet('si-uptime-sub', wu ? `${wu.secs}s — web berjalan` : '—');
+      _siSet('si-os-uptime',  _fmtUp(sys.osUptime));
 
       // ── Sessions Card ──
-      document.getElementById('si-sessions').textContent = app.activeSessions;
-      document.getElementById('si-runtime').textContent = app.runtime;
+      _siSet('si-sessions', app.activeSessions, 0);
+      _siSet('si-runtime',  app.runtime || 'Node.js');
 
       // ── Node Memory Card ──
-      document.getElementById('si-heap-used').textContent = p.heapUsed;
-      document.getElementById('si-heap-total').textContent = p.heapTotal;
-      document.getElementById('si-heap-bar').style.width = p.heapUsedPercent + '%';
-      document.getElementById('si-rss').textContent = p.rss;
-      document.getElementById('si-external').textContent = p.external;
-      document.getElementById('si-heap-limit').textContent = p.heapSizeLimit;
+      _siSet('si-heap-used',  p.heapUsed);
+      _siSet('si-heap-total', p.heapTotal);
+      const heapBar = document.getElementById('si-heap-bar');
+      if (heapBar) heapBar.style.width = (p.heapUsedPercent || 0) + '%';
+      _siSet('si-rss',        p.rss);
+      _siSet('si-external',   p.external);
+      _siSet('si-heap-limit', p.heapSizeLimit);
 
       // ── Process Info Card ──
-      document.getElementById('si-pid').textContent = p.pid;
-      document.getElementById('si-port').textContent = ':' + p.port;
-      document.getElementById('si-fw').textContent = app.framework;
-      document.getElementById('si-env').innerHTML = `<span style="background:${p.env==='production'?'rgba(52,211,153,.15)':'rgba(251,191,36,.15)'};color:${p.env==='production'?'var(--green)':'var(--yellow)'};padding:2px 8px;border-radius:20px;font-size:0.72rem;">${p.env}</span>`;
-      document.getElementById('si-v8').textContent = sys.v8Version;
+      _siSet('si-pid',  p.pid);
+      _siSet('si-port', p.port ? ':' + p.port : '—');
+      _siSet('si-fw',   app.framework);
+      const envVal = p.env || 'production';
+      _siHtml('si-env', `<span style="background:${envVal==='production'?'rgba(52,211,153,.15)':'rgba(251,191,36,.15)'};color:${envVal==='production'?'var(--green)':'var(--yellow)'};padding:2px 8px;border-radius:20px;font-size:0.72rem;">${envVal}</span>`);
+      _siSet('si-v8', sys.v8Version);
 
       // ── OS Card ──
-      document.getElementById('si-platform').textContent = sys.platform;
-      document.getElementById('si-ostype').textContent = sys.type;
-      document.getElementById('si-arch').textContent = sys.arch;
-      document.getElementById('si-release').textContent = sys.release;
-      document.getElementById('si-nodever').textContent = sys.nodeVersion;
-      const cpuModel = c.model;
-      document.getElementById('si-cpumodel').textContent = cpuModel.length > 40 ? cpuModel.substring(0,40)+'…' : cpuModel;
+      _siSet('si-platform', sys.platform);
+      _siSet('si-ostype',   sys.type);
+      _siSet('si-arch',     sys.arch);
+      _siSet('si-release',  sys.release);
+      _siSet('si-nodever',  sys.nodeVersion);
+      const cpuModel = String(c.model || '');
+      _siSet('si-cpumodel', cpuModel.length > 40 ? cpuModel.substring(0,40)+'…' : cpuModel);
 
       // ── Raw JSON ──
-      // Strip IP-sensitive fields before display
-      const safeData = JSON.parse(JSON.stringify(data));
-      document.getElementById('serverRaw').textContent = JSON.stringify(safeData, null, 2);
+      const raw = document.getElementById('serverRaw');
+      if (raw) raw.textContent = JSON.stringify(data, null, 2);
 
     } catch (e) {
       console.error('Server info error:', e);
