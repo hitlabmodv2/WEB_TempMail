@@ -955,18 +955,40 @@
 
     /* Tech stack */
     .dev-tech {
-      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      padding: 14px 16px 16px;
       display: flex; flex-wrap: wrap; gap: 8px;
     }
     .tech-chip {
       display: inline-flex; align-items: center; gap: 5px;
       background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 20px; padding: 4px 12px;
+      border-radius: 20px; padding: 5px 13px;
       font-size: 0.72rem; font-weight: 600; color: var(--text2);
-      transition: all 0.2s;
+      transition: all 0.2s; text-decoration: none; cursor: pointer;
     }
-    .tech-chip:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+    .tech-chip:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
     .tech-chip i { font-size: 0.8rem; }
+    .tech-chip .tc-ext { font-size: 0.58rem; opacity: 0.5; margin-left: 1px; }
+
+    /* Bottom stats + tech card */
+    .dev-bottom-card {
+      background: var(--card); border-radius: var(--radius);
+      border: 1px solid var(--border); margin-bottom: 16px; overflow: hidden;
+    }
+    .dev-bottom-title {
+      padding: 12px 16px 0; font-size: 0.65rem; font-weight: 700;
+      color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .dev-stats-row {
+      display: flex; gap: 0; padding: 8px 0;
+    }
+    .dev-stat-item {
+      flex: 1; text-align: center; padding: 10px 8px;
+      border-right: 1px solid rgba(255,255,255,0.07);
+    }
+    .dev-stat-item:last-child { border-right: none; }
+    .dev-stat-item-val { font-size: 1.15rem; font-weight: 800; line-height: 1; }
+    .dev-stat-item-val span { background: linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .dev-stat-item-lbl { font-size: 0.6rem; color: var(--text3); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; }
 
     /* Social grid */
     .social-grid {
@@ -2096,35 +2118,6 @@
           <span class="dev-badge bot2"><i class="fa-solid fa-robot"></i>BOT CREATOR</span>
         </div>
 
-        <!-- Stats -->
-        <div class="dev-stats">
-          <div class="dev-stat">
-            <div class="dev-stat-val"><span>10+</span></div>
-            <div class="dev-stat-lbl">Projects</div>
-          </div>
-          <div class="dev-stat">
-            <div class="dev-stat-val"><span>5+</span></div>
-            <div class="dev-stat-lbl">Bots</div>
-          </div>
-          <div class="dev-stat">
-            <div class="dev-stat-val"><span>2K+</span></div>
-            <div class="dev-stat-lbl">Users</div>
-          </div>
-          <div class="dev-stat">
-            <div class="dev-stat-val"><span>3+</span></div>
-            <div class="dev-stat-lbl">Years</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tech Stack -->
-      <div class="dev-tech">
-        <span class="tech-chip"><i class="fa-brands fa-node-js" style="color:#68a063;"></i>Node.js</span>
-        <span class="tech-chip"><i class="fa-brands fa-js" style="color:#f7df1e;"></i>JavaScript</span>
-        <span class="tech-chip"><i class="fa-brands fa-python" style="color:#3776ab;"></i>Python</span>
-        <span class="tech-chip"><i class="fa-brands fa-html5" style="color:#e34f26;"></i>HTML/CSS</span>
-        <span class="tech-chip"><i class="fa-brands fa-react" style="color:#61dafb;"></i>React</span>
-        <span class="tech-chip"><i class="fa-solid fa-database" style="color:var(--cyan);"></i>MongoDB</span>
       </div>
 
       <!-- Social Links — Accordion -->
@@ -2135,7 +2128,7 @@
           <button class="social-trigger" onclick="toggleSocialItem(this)">
             <div class="social-icon fb"><i class="fa-brands fa-facebook"></i></div>
             <div class="social-trigger-info">
-              <div class="social-trigger-sub">Facebook Professional</div>
+              <div class="social-trigger-sub">Facebook</div>
               <div class="social-trigger-name">My Facebook</div>
             </div>
             <i class="fa-solid fa-chevron-down social-trigger-chevron"></i>
@@ -2294,6 +2287,53 @@
       </div>
     </div>
 
+    <!-- ── Stats ── -->
+    <div class="dev-bottom-card">
+      <div class="dev-bottom-title">📊 Statistik</div>
+      <div class="dev-stats-row">
+        <div class="dev-stat-item">
+          <div class="dev-stat-item-val"><span>10+</span></div>
+          <div class="dev-stat-item-lbl">Projects</div>
+        </div>
+        <div class="dev-stat-item">
+          <div class="dev-stat-item-val"><span>5+</span></div>
+          <div class="dev-stat-item-lbl">Bots</div>
+        </div>
+        <div class="dev-stat-item">
+          <div class="dev-stat-item-val"><span>2K+</span></div>
+          <div class="dev-stat-item-lbl">Users</div>
+        </div>
+        <div class="dev-stat-item">
+          <div class="dev-stat-item-val"><span>3+</span></div>
+          <div class="dev-stat-item-lbl">Years</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tech Stack ── -->
+    <div class="dev-bottom-card">
+      <div class="dev-bottom-title">🛠️ Tech Stack</div>
+      <div class="dev-tech">
+        <a class="tech-chip" href="https://nodejs.org" target="_blank" rel="noopener noreferrer">
+          <i class="fa-brands fa-node-js" style="color:#68a063;"></i>Node.js<i class="fa-solid fa-arrow-up-right-from-square tc-ext"></i>
+        </a>
+        <a class="tech-chip" href="https://developer.mozilla.org/docs/Web/JavaScript" target="_blank" rel="noopener noreferrer">
+          <i class="fa-brands fa-js" style="color:#f7df1e;"></i>JavaScript<i class="fa-solid fa-arrow-up-right-from-square tc-ext"></i>
+        </a>
+        <a class="tech-chip" href="https://python.org" target="_blank" rel="noopener noreferrer">
+          <i class="fa-brands fa-python" style="color:#3776ab;"></i>Python<i class="fa-solid fa-arrow-up-right-from-square tc-ext"></i>
+        </a>
+        <a class="tech-chip" href="https://developer.mozilla.org/docs/Web/HTML" target="_blank" rel="noopener noreferrer">
+          <i class="fa-brands fa-html5" style="color:#e34f26;"></i>HTML/CSS<i class="fa-solid fa-arrow-up-right-from-square tc-ext"></i>
+        </a>
+        <a class="tech-chip" href="https://react.dev" target="_blank" rel="noopener noreferrer">
+          <i class="fa-brands fa-react" style="color:#61dafb;"></i>React<i class="fa-solid fa-arrow-up-right-from-square tc-ext"></i>
+        </a>
+        <a class="tech-chip" href="https://mongodb.com" target="_blank" rel="noopener noreferrer">
+          <i class="fa-solid fa-database" style="color:var(--cyan);"></i>MongoDB<i class="fa-solid fa-arrow-up-right-from-square tc-ext"></i>
+        </a>
+      </div>
+    </div>
 
   </div>
 </div>
