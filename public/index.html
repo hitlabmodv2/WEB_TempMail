@@ -1031,8 +1031,11 @@
     .social-trigger-chevron { color: var(--text3); font-size: 0.75rem; flex-shrink: 0; transition: transform 0.28s; }
     .social-item.open .social-trigger-chevron { transform: rotate(180deg); }
     .social-reveal { max-height: 0; overflow: hidden; transition: max-height 0.42s ease; }
-    .social-item.open .social-reveal { max-height: 120px; }
-    .social-item.fb.open .social-reveal { max-height: 360px; }
+    .social-item.open .social-reveal { max-height: 380px; }
+    .social-item.fb.open .social-reveal { max-height: 380px; }
+    @media (max-width: 480px) {
+      .social-item.open .social-reveal { max-height: 560px; }
+    }
     .social-reveal-inner {
       padding: 2px 14px 14px;
       display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -1059,79 +1062,98 @@
     .social-item.yt .social-visit-btn { background: #ff4444; }
 
     /* ── Facebook Pro Profile Card ── */
-    /* ── Facebook Pro Profile Card ── */
-    .fb-profile-card { width: 100%; margin: 0; border-radius: 12px; overflow: hidden; background: var(--bg); border: 1px solid rgba(24,119,242,0.22); }
-    .fb-cover {
-      height: 90px; position: relative;
-      background: linear-gradient(135deg, #1877f2 0%, #0a4fa3 40%, #6c3fc5 100%);
-      overflow: hidden; flex-shrink: 0;
+    /* ══ Shared Social Profile Card (FB / WA / TG / YT) ══ */
+    .sc-card {
+      width: 100%; border-radius: 12px; overflow: visible;
+      background: var(--bg); position: relative;
+      border: 1px solid var(--border);
     }
-    .fb-cover::after {
+    .sc-cover {
+      height: 82px; border-radius: 12px 12px 0 0;
+      position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    .sc-cover::after {
       content: ''; position: absolute; inset: 0;
-      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='28' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1.5'/%3E%3C/svg%3E") repeat;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='26' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1.5'/%3E%3C/svg%3E") repeat;
     }
-    .fb-pro-badge {
+    .sc-cover-fb  { background: linear-gradient(135deg,#1877f2 0%,#0a4fa3 45%,#6c3fc5 100%); }
+    .sc-cover-wa  { background: linear-gradient(135deg,#075e54 0%,#128c7e 50%,#25d366 100%); }
+    .sc-cover-tg  { background: linear-gradient(135deg,#0f3460 0%,#1565c0 50%,#24a1de 100%); }
+    .sc-cover-yt  { background: linear-gradient(135deg,#7f0000 0%,#c62828 55%,#ff4444 100%); }
+
+    .sc-badge {
       position: absolute; top: 8px; right: 10px; z-index: 2;
-      background: rgba(0,0,0,0.50); backdrop-filter: blur(6px);
-      color: #fff; font-size: 0.58rem; font-weight: 700;
-      padding: 3px 9px; border-radius: 20px; letter-spacing: 0.5px;
-      display: flex; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.48); backdrop-filter: blur(6px);
+      color: #fff; font-size: 0.57rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px; letter-spacing: 0.4px;
+      display: flex; align-items: center; gap: 4px;
+      border: 1px solid rgba(255,255,255,0.18);
     }
-    .fb-avatar-wrap { position: absolute; bottom: -26px; left: 14px; z-index: 3; }
-    .fb-avatar-wrap img {
+    /* Avatar — sits OUTSIDE .sc-cover so it's never clipped */
+    .sc-avatar {
+      position: absolute; top: 50px; left: 14px; z-index: 10;
+      pointer-events: none;
+    }
+    .sc-avatar img {
       width: 58px; height: 58px; border-radius: 50%;
-      border: 3px solid var(--card); object-fit: cover;
-      box-shadow: 0 2px 14px rgba(24,119,242,0.55);
+      border: 3px solid var(--bg); object-fit: cover;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.45);
+      display: block;
     }
-    .fb-online-dot {
+    .sc-online {
       position: absolute; bottom: 2px; right: 2px;
-      width: 14px; height: 14px; border-radius: 50%;
+      width: 13px; height: 13px; border-radius: 50%;
       background: #22c55e; border: 2px solid var(--bg);
     }
-    .fb-info {
-      padding: 34px 14px 14px;
+    .sc-info {
+      padding: 34px 14px 12px;
       display: flex; flex-wrap: wrap; align-items: flex-start;
       justify-content: space-between; gap: 10px;
     }
-    .fb-info-left { min-width: 0; flex: 1 1 180px; }
-    .fb-name {
-      font-size: 0.97rem; font-weight: 800; color: var(--text);
+    .sc-info-left { min-width: 0; flex: 1 1 160px; }
+    .sc-name {
+      font-size: 0.95rem; font-weight: 800; color: var(--text);
       line-height: 1.2; display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
     }
-    .fb-verified { color: #1877f2; font-size: 0.75rem; flex-shrink: 0; }
-    .fb-handle { font-size: 0.67rem; color: var(--text3); margin-top: 2px; }
-    .fb-tagline {
-      font-size: 0.68rem; color: var(--text2); margin-top: 5px; line-height: 1.4;
-      font-style: italic;
+    .sc-check-fb  { color: #1877f2; font-size: 0.72rem; }
+    .sc-check-wa  { color: #25d366; font-size: 0.72rem; }
+    .sc-check-tg  { color: #24a1de; font-size: 0.72rem; }
+    .sc-check-yt  { color: #ff4444; font-size: 0.72rem; }
+    .sc-tagline {
+      font-size: 0.67rem; color: var(--text2); margin-top: 4px;
+      line-height: 1.45; font-style: italic;
     }
-    .fb-actions { display: flex; gap: 7px; flex-shrink: 0; flex-wrap: wrap; align-self: flex-start; }
-    .fb-btn-follow {
+    .sc-actions { display: flex; gap: 7px; flex-shrink: 0; flex-wrap: wrap; align-self: flex-start; }
+    .sc-btn {
       display: inline-flex; align-items: center; gap: 5px;
-      padding: 8px 16px; border-radius: 8px; font-size: 0.74rem; font-weight: 700;
-      background: #1877f2; color: #fff; text-decoration: none; border: none; cursor: pointer;
-      transition: background 0.18s; white-space: nowrap; flex: 1 1 auto;
-      justify-content: center;
+      padding: 8px 15px; border-radius: 8px; font-size: 0.73rem; font-weight: 700;
+      text-decoration: none; color: #fff; white-space: nowrap;
+      transition: opacity 0.18s; justify-content: center; flex: 1 1 auto;
     }
-    .fb-btn-follow:hover { background: #1565d8; }
-    .fb-btn-msg {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 8px 14px; border-radius: 8px; font-size: 0.74rem; font-weight: 700;
-      background: rgba(24,119,242,0.12); color: #1877f2;
-      border: 1px solid rgba(24,119,242,0.3); text-decoration: none; cursor: pointer;
-      transition: background 0.18s; white-space: nowrap; flex: 1 1 auto;
-      justify-content: center;
+    .sc-btn:hover { opacity: 0.82; }
+    .sc-btn-fb   { background: #1877f2; }
+    .sc-btn-wa   { background: #25d366; }
+    .sc-btn-tg   { background: #24a1de; }
+    .sc-btn-yt   { background: #ff4444; }
+    .sc-btn-ghost-fb { background: rgba(24,119,242,0.12); color: #1877f2; border: 1px solid rgba(24,119,242,0.3); }
+    .sc-btn-ghost-wa { background: rgba(37,211,102,0.12); color: #25d366; border: 1px solid rgba(37,211,102,0.3); }
+    .sc-btn-ghost-tg { background: rgba(36,161,222,0.12); color: #24a1de; border: 1px solid rgba(36,161,222,0.3); }
+    .sc-btn-ghost-yt { background: rgba(255,68,68,0.12); color: #ff4444; border: 1px solid rgba(255,68,68,0.3); }
+    .sc-btn-ghost-fb:hover { background: rgba(24,119,242,0.22); }
+    .sc-btn-ghost-wa:hover { background: rgba(37,211,102,0.22); }
+    .sc-btn-ghost-tg:hover { background: rgba(36,161,222,0.22); }
+    .sc-btn-ghost-yt:hover { background: rgba(255,68,68,0.22); }
+    .sc-footer {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px 14px; font-size: 0.68rem; color: var(--text3);
+      border-top: 1px solid var(--border); text-decoration: none;
+      transition: background 0.18s; border-radius: 0 0 12px 12px;
     }
-    .fb-btn-msg:hover { background: rgba(24,119,242,0.22); }
-    .fb-open-link {
-      display: block; text-align: center; padding: 9px;
-      font-size: 0.68rem; color: var(--text3); text-decoration: none;
-      border-top: 1px solid var(--border); transition: background 0.18s;
-    }
-    .fb-open-link:hover { background: rgba(24,119,242,0.06); color: #1877f2; }
+    .sc-footer:hover { background: rgba(255,255,255,0.03); }
     @media (max-width: 480px) {
-      .social-item.fb.open .social-reveal { max-height: 560px; }
-      .fb-actions { width: 100%; }
-      .fb-btn-follow, .fb-btn-msg { flex: 1; }
+      .sc-actions { width: 100%; }
+      .sc-btn, .sc-btn-ghost-fb, .sc-btn-ghost-wa,
+      .sc-btn-ghost-tg, .sc-btn-ghost-yt { flex: 1; }
     }
 
     /* WA Channel cards */
@@ -2108,7 +2130,7 @@
       <!-- Social Links — Accordion -->
       <div class="social-list">
 
-        <!-- Facebook — PALING ATAS, dengan profile card Pro -->
+        <!-- ── Facebook ── -->
         <div class="social-item fb" data-social="facebook">
           <button class="social-trigger" onclick="toggleSocialItem(this)">
             <div class="social-icon fb"><i class="fa-brands fa-facebook"></i></div>
@@ -2120,103 +2142,152 @@
           </button>
           <div class="social-reveal">
             <div class="social-reveal-inner" style="padding:10px 12px 14px;display:block;">
-              <div class="social-click-message" aria-live="polite" style="margin-bottom:10px;"></div>
-              <!-- Facebook Pro Profile Card -->
-              <div class="fb-profile-card">
-                <!-- Cover -->
-                <div class="fb-cover">
-                  <div class="fb-pro-badge"><i class="fa-solid fa-star" style="color:#fbbf24;font-size:0.55rem;"></i> Professional Mode</div>
-                  <div class="fb-avatar-wrap">
-                    <img src="/icon/dev-avatar.jpg" alt="Wily Kun" />
-                    <div class="fb-online-dot"></div>
-                  </div>
+              <div class="social-click-message" aria-live="polite" style="margin-bottom:8px;"></div>
+              <div class="sc-card" style="border-color:rgba(24,119,242,0.25);">
+                <div class="sc-cover sc-cover-fb">
+                  <div class="sc-badge"><i class="fa-solid fa-star" style="color:#fbbf24;font-size:0.52rem;"></i> Professional Mode</div>
                 </div>
-                <!-- Info -->
-                <div class="fb-info">
-                  <div class="fb-info-left">
-                    <div class="fb-name">
-                      Wily Kun
-                      <i class="fa-solid fa-circle-check fb-verified" title="Professional Mode"></i>
-                    </div>
-                    <div class="fb-tagline">Full Stack Developer &amp; Bot Creator · Indonesia 🇮🇩</div>
+                <div class="sc-avatar">
+                  <img src="/icon/dev-avatar.jpg" alt="Wily Kun">
+                  <div class="sc-online"></div>
+                </div>
+                <div class="sc-info">
+                  <div class="sc-info-left">
+                    <div class="sc-name">Wily Kun <i class="fa-solid fa-circle-check sc-check-fb"></i></div>
+                    <div class="sc-tagline">Full Stack Dev &amp; Bot Creator · Indonesia 🇮🇩</div>
                   </div>
-                  <div class="fb-actions">
-                    <a class="fb-btn-follow" href="https://www.facebook.com/wily.kun.1" target="_blank" rel="noopener noreferrer">
+                  <div class="sc-actions">
+                    <a class="sc-btn sc-btn-fb" href="https://www.facebook.com/wily.kun.1" target="_blank" rel="noopener noreferrer">
                       <i class="fa-solid fa-user-plus"></i> Follow
                     </a>
-                    <a class="fb-btn-msg" href="https://m.me/wily.kun.1" target="_blank" rel="noopener noreferrer">
+                    <a class="sc-btn sc-btn-ghost-fb" href="https://www.facebook.com/messages/t/wily.kun.1" target="_blank" rel="noopener noreferrer">
                       <i class="fa-brands fa-facebook-messenger"></i> Chat
                     </a>
                   </div>
                 </div>
-                <!-- Footer -->
-                <a class="fb-open-link" href="https://www.facebook.com/wily.kun.1" target="_blank" rel="noopener noreferrer">
-                  <i class="fa-brands fa-facebook" style="margin-right:5px;color:#1877f2;"></i>Buka profil di Facebook →
+                <a class="sc-footer" href="https://www.facebook.com/wily.kun.1" target="_blank" rel="noopener noreferrer">
+                  <i class="fa-brands fa-facebook" style="color:#1877f2;"></i> Buka profil di Facebook
                 </a>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- WhatsApp -->
+        <!-- ── WhatsApp ── -->
         <div class="social-item wa" data-social="whatsapp">
           <button class="social-trigger" onclick="toggleSocialItem(this)">
             <div class="social-icon wa"><i class="fa-brands fa-whatsapp"></i></div>
             <div class="social-trigger-info">
-              <div class="social-trigger-sub">Social Media</div>
+              <div class="social-trigger-sub">WhatsApp</div>
               <div class="social-trigger-name">My WhatsApp</div>
             </div>
             <i class="fa-solid fa-chevron-down social-trigger-chevron"></i>
           </button>
           <div class="social-reveal">
-            <div class="social-reveal-inner">
-              <div class="social-click-message" aria-live="polite"></div>
-              <div class="social-reveal-id">Bang Wily</div>
-              <a class="social-visit-btn" href="https://wa.me/6289688206739" target="_blank">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
-              </a>
+            <div class="social-reveal-inner" style="padding:10px 12px 14px;display:block;">
+              <div class="social-click-message" aria-live="polite" style="margin-bottom:8px;"></div>
+              <div class="sc-card" style="border-color:rgba(37,211,102,0.25);">
+                <div class="sc-cover sc-cover-wa">
+                  <div class="sc-badge"><i class="fa-brands fa-whatsapp" style="font-size:0.65rem;"></i> WhatsApp</div>
+                </div>
+                <div class="sc-avatar">
+                  <img src="/icon/dev-avatar.jpg" alt="Bang Wily">
+                  <div class="sc-online"></div>
+                </div>
+                <div class="sc-info">
+                  <div class="sc-info-left">
+                    <div class="sc-name">Bang Wily <i class="fa-solid fa-circle-check sc-check-wa"></i></div>
+                    <div class="sc-tagline">Full Stack Dev &amp; Bot Creator · Indonesia 🇮🇩</div>
+                  </div>
+                  <div class="sc-actions">
+                    <a class="sc-btn sc-btn-wa" href="https://wa.me/6289688206739" target="_blank" rel="noopener noreferrer">
+                      <i class="fa-brands fa-whatsapp"></i> Chat WA
+                    </a>
+                  </div>
+                </div>
+                <a class="sc-footer" href="https://wa.me/6289688206739" target="_blank" rel="noopener noreferrer">
+                  <i class="fa-brands fa-whatsapp" style="color:#25d366;"></i> Buka di WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Telegram -->
+        <!-- ── Telegram ── -->
         <div class="social-item tg" data-social="telegram">
           <button class="social-trigger" onclick="toggleSocialItem(this)">
             <div class="social-icon tg"><i class="fa-brands fa-telegram"></i></div>
             <div class="social-trigger-info">
-              <div class="social-trigger-sub">Social Media</div>
+              <div class="social-trigger-sub">Telegram</div>
               <div class="social-trigger-name">My Telegram</div>
             </div>
             <i class="fa-solid fa-chevron-down social-trigger-chevron"></i>
           </button>
           <div class="social-reveal">
-            <div class="social-reveal-inner">
-              <div class="social-click-message" aria-live="polite"></div>
-              <div class="social-reveal-id">@Wilykun1994</div>
-              <a class="social-visit-btn" href="https://t.me/Wilykun1994" target="_blank">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
-              </a>
+            <div class="social-reveal-inner" style="padding:10px 12px 14px;display:block;">
+              <div class="social-click-message" aria-live="polite" style="margin-bottom:8px;"></div>
+              <div class="sc-card" style="border-color:rgba(36,161,222,0.25);">
+                <div class="sc-cover sc-cover-tg">
+                  <div class="sc-badge"><i class="fa-brands fa-telegram" style="font-size:0.65rem;"></i> Telegram</div>
+                </div>
+                <div class="sc-avatar">
+                  <img src="/icon/dev-avatar.jpg" alt="Wily Kun">
+                  <div class="sc-online"></div>
+                </div>
+                <div class="sc-info">
+                  <div class="sc-info-left">
+                    <div class="sc-name">Wily Kun <i class="fa-solid fa-circle-check sc-check-tg"></i></div>
+                    <div class="sc-tagline">@Wilykun1994 · Full Stack Dev &amp; Bot Creator 🤖</div>
+                  </div>
+                  <div class="sc-actions">
+                    <a class="sc-btn sc-btn-tg" href="https://t.me/Wilykun1994" target="_blank" rel="noopener noreferrer">
+                      <i class="fa-brands fa-telegram"></i> Message
+                    </a>
+                  </div>
+                </div>
+                <a class="sc-footer" href="https://t.me/Wilykun1994" target="_blank" rel="noopener noreferrer">
+                  <i class="fa-brands fa-telegram" style="color:#24a1de;"></i> Buka di Telegram
+                </a>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- YouTube -->
+        <!-- ── YouTube ── -->
         <div class="social-item yt" data-social="youtube">
           <button class="social-trigger" onclick="toggleSocialItem(this)">
             <div class="social-icon yt"><i class="fa-brands fa-youtube"></i></div>
             <div class="social-trigger-info">
-              <div class="social-trigger-sub">Social Media</div>
+              <div class="social-trigger-sub">YouTube</div>
               <div class="social-trigger-name">My YouTube</div>
             </div>
             <i class="fa-solid fa-chevron-down social-trigger-chevron"></i>
           </button>
           <div class="social-reveal">
-            <div class="social-reveal-inner">
-              <div class="social-click-message" aria-live="polite"></div>
-              <div class="social-reveal-id">@ukosamasomoni1956</div>
-              <a class="social-visit-btn" href="https://youtube.com/@ukosamasomoni1956" target="_blank">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
-              </a>
+            <div class="social-reveal-inner" style="padding:10px 12px 14px;display:block;">
+              <div class="social-click-message" aria-live="polite" style="margin-bottom:8px;"></div>
+              <div class="sc-card" style="border-color:rgba(255,68,68,0.25);">
+                <div class="sc-cover sc-cover-yt">
+                  <div class="sc-badge"><i class="fa-brands fa-youtube" style="font-size:0.65rem;"></i> YouTube</div>
+                </div>
+                <div class="sc-avatar">
+                  <img src="/icon/dev-avatar.jpg" alt="Wily Kun">
+                </div>
+                <div class="sc-info">
+                  <div class="sc-info-left">
+                    <div class="sc-name">Wily Kun <i class="fa-solid fa-circle-check sc-check-yt"></i></div>
+                    <div class="sc-tagline">@ukosamasomoni1956 · Konten Dev &amp; Tutorial 🎬</div>
+                  </div>
+                  <div class="sc-actions">
+                    <a class="sc-btn sc-btn-yt" href="https://youtube.com/@ukosamasomoni1956" target="_blank" rel="noopener noreferrer">
+                      <i class="fa-brands fa-youtube"></i> Subscribe
+                    </a>
+                  </div>
+                </div>
+                <a class="sc-footer" href="https://youtube.com/@ukosamasomoni1956" target="_blank" rel="noopener noreferrer">
+                  <i class="fa-brands fa-youtube" style="color:#ff4444;"></i> Buka Channel YouTube
+                </a>
+              </div>
             </div>
           </div>
         </div>
