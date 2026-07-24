@@ -1059,65 +1059,80 @@
     .social-item.yt .social-visit-btn { background: #ff4444; }
 
     /* ── Facebook Pro Profile Card ── */
-    .fb-profile-card { width: 100%; margin: 0 0 14px; border-radius: 12px; overflow: hidden; background: var(--bg); border: 1px solid rgba(24,119,242,0.18); }
+    /* ── Facebook Pro Profile Card ── */
+    .fb-profile-card { width: 100%; margin: 0; border-radius: 12px; overflow: hidden; background: var(--bg); border: 1px solid rgba(24,119,242,0.22); }
     .fb-cover {
-      height: 88px; position: relative;
+      height: 90px; position: relative;
       background: linear-gradient(135deg, #1877f2 0%, #0a4fa3 40%, #6c3fc5 100%);
-      overflow: hidden;
+      overflow: hidden; flex-shrink: 0;
     }
     .fb-cover::after {
       content: ''; position: absolute; inset: 0;
       background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='28' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1.5'/%3E%3C/svg%3E") repeat;
-      opacity: 0.6;
     }
     .fb-pro-badge {
       position: absolute; top: 8px; right: 10px; z-index: 2;
-      background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+      background: rgba(0,0,0,0.50); backdrop-filter: blur(6px);
       color: #fff; font-size: 0.58rem; font-weight: 700;
-      padding: 3px 8px; border-radius: 20px; letter-spacing: 0.5px;
-      display: flex; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,0.18);
+      padding: 3px 9px; border-radius: 20px; letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,0.2);
     }
-    .fb-avatar-wrap {
-      position: absolute; bottom: -26px; left: 14px; z-index: 3;
-    }
+    .fb-avatar-wrap { position: absolute; bottom: -26px; left: 14px; z-index: 3; }
     .fb-avatar-wrap img {
-      width: 56px; height: 56px; border-radius: 50%;
-      border: 3px solid #1877f2; object-fit: cover;
-      box-shadow: 0 2px 12px rgba(24,119,242,0.5);
+      width: 58px; height: 58px; border-radius: 50%;
+      border: 3px solid var(--card); object-fit: cover;
+      box-shadow: 0 2px 14px rgba(24,119,242,0.55);
     }
     .fb-online-dot {
-      position: absolute; bottom: 2px; right: 1px;
-      width: 13px; height: 13px; border-radius: 50%;
+      position: absolute; bottom: 2px; right: 2px;
+      width: 14px; height: 14px; border-radius: 50%;
       background: #22c55e; border: 2px solid var(--bg);
     }
     .fb-info {
-      padding: 32px 14px 12px;
-      display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+      padding: 34px 14px 14px;
+      display: flex; flex-wrap: wrap; align-items: flex-start;
+      justify-content: space-between; gap: 10px;
     }
-    .fb-info-left { min-width: 0; flex: 1; }
-    .fb-name { font-size: 0.95rem; font-weight: 800; color: var(--text); line-height: 1.2; display: flex; align-items: center; gap: 5px; }
-    .fb-verified { color: #1877f2; font-size: 0.72rem; }
-    .fb-handle { font-size: 0.67rem; color: var(--text3); margin-top: 1px; }
-    .fb-stats { display: flex; gap: 14px; margin-top: 7px; }
-    .fb-stat { text-align: center; }
-    .fb-stat-val { font-size: 0.8rem; font-weight: 800; color: var(--text); line-height: 1; }
-    .fb-stat-lbl { font-size: 0.6rem; color: var(--text3); margin-top: 1px; text-transform: uppercase; letter-spacing: 0.4px; }
-    .fb-actions { display: flex; gap: 7px; flex-shrink: 0; margin-top: 2px; }
+    .fb-info-left { min-width: 0; flex: 1 1 180px; }
+    .fb-name {
+      font-size: 0.97rem; font-weight: 800; color: var(--text);
+      line-height: 1.2; display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+    }
+    .fb-verified { color: #1877f2; font-size: 0.75rem; flex-shrink: 0; }
+    .fb-handle { font-size: 0.67rem; color: var(--text3); margin-top: 2px; }
+    .fb-tagline {
+      font-size: 0.68rem; color: var(--text2); margin-top: 5px; line-height: 1.4;
+      font-style: italic;
+    }
+    .fb-actions { display: flex; gap: 7px; flex-shrink: 0; flex-wrap: wrap; align-self: flex-start; }
     .fb-btn-follow {
       display: inline-flex; align-items: center; gap: 5px;
-      padding: 7px 14px; border-radius: 8px; font-size: 0.72rem; font-weight: 700;
+      padding: 8px 16px; border-radius: 8px; font-size: 0.74rem; font-weight: 700;
       background: #1877f2; color: #fff; text-decoration: none; border: none; cursor: pointer;
-      transition: background 0.18s; white-space: nowrap;
+      transition: background 0.18s; white-space: nowrap; flex: 1 1 auto;
+      justify-content: center;
     }
     .fb-btn-follow:hover { background: #1565d8; }
     .fb-btn-msg {
       display: inline-flex; align-items: center; gap: 5px;
-      padding: 7px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 700;
+      padding: 8px 14px; border-radius: 8px; font-size: 0.74rem; font-weight: 700;
       background: rgba(24,119,242,0.12); color: #1877f2;
       border: 1px solid rgba(24,119,242,0.3); text-decoration: none; cursor: pointer;
-      transition: background 0.18s; white-space: nowrap;
+      transition: background 0.18s; white-space: nowrap; flex: 1 1 auto;
+      justify-content: center;
     }
-    .fb-btn-msg:hover { background: rgba(24,119,242,0.2); }
+    .fb-btn-msg:hover { background: rgba(24,119,242,0.22); }
+    .fb-open-link {
+      display: block; text-align: center; padding: 9px;
+      font-size: 0.68rem; color: var(--text3); text-decoration: none;
+      border-top: 1px solid var(--border); transition: background 0.18s;
+    }
+    .fb-open-link:hover { background: rgba(24,119,242,0.06); color: #1877f2; }
+    @media (max-width: 480px) {
+      .social-item.fb.open .social-reveal { max-height: 560px; }
+      .fb-actions { width: 100%; }
+      .fb-btn-follow, .fb-btn-msg { flex: 1; }
+    }
 
     /* WA Channel cards */
     .chan-item {
@@ -2110,7 +2125,7 @@
               <div class="fb-profile-card">
                 <!-- Cover -->
                 <div class="fb-cover">
-                  <div class="fb-pro-badge"><i class="fa-solid fa-star" style="color:#fbbf24;font-size:0.55rem;"></i> Professional</div>
+                  <div class="fb-pro-badge"><i class="fa-solid fa-star" style="color:#fbbf24;font-size:0.55rem;"></i> Professional Mode</div>
                   <div class="fb-avatar-wrap">
                     <img src="/icon/dev-avatar.jpg" alt="Wily Kun" />
                     <div class="fb-online-dot"></div>
@@ -2124,30 +2139,21 @@
                       <i class="fa-solid fa-circle-check fb-verified" title="Professional Mode"></i>
                     </div>
                     <div class="fb-handle">facebook.com/wily.kun.1</div>
-                    <div class="fb-stats">
-                      <div class="fb-stat">
-                        <div class="fb-stat-val">1.2K</div>
-                        <div class="fb-stat-lbl">Followers</div>
-                      </div>
-                      <div class="fb-stat">
-                        <div class="fb-stat-val">430</div>
-                        <div class="fb-stat-lbl">Friends</div>
-                      </div>
-                      <div class="fb-stat">
-                        <div class="fb-stat-val">⭐ Pro</div>
-                        <div class="fb-stat-lbl">Mode</div>
-                      </div>
-                    </div>
+                    <div class="fb-tagline">Full Stack Developer &amp; Bot Creator · Indonesia 🇮🇩</div>
                   </div>
                   <div class="fb-actions">
                     <a class="fb-btn-follow" href="https://www.facebook.com/wily.kun.1" target="_blank" rel="noopener">
                       <i class="fa-solid fa-user-plus"></i> Follow
                     </a>
-                    <a class="fb-btn-msg" href="https://m.me/wily.kun.1" target="_blank" rel="noopener">
+                    <a class="fb-btn-msg" href="https://www.messenger.com/t/wily.kun.1" target="_blank" rel="noopener">
                       <i class="fa-brands fa-facebook-messenger"></i> Chat
                     </a>
                   </div>
                 </div>
+                <!-- Footer link -->
+                <a class="fb-open-link" href="https://www.facebook.com/wily.kun.1" target="_blank" rel="noopener">
+                  <i class="fa-brands fa-facebook" style="margin-right:5px;color:#1877f2;"></i>Lihat profil lengkap di Facebook →
+                </a>
               </div>
             </div>
           </div>
