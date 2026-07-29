@@ -2,10 +2,9 @@ const path = require('path');
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
-const TMailScraper = require('../src/scrape/scraper');
+const TempMailOrgScraper = require('../src/scrape/tempMailOrgScraper');
 
 const app = express();
-const FORCED_DOMAIN = 'us.seebestdeals.com';
 
 // ── Waktu start instance — untuk webUptime ─────────────────────────────────
 const _instanceStart = Date.now();
@@ -26,30 +25,6 @@ setInterval(() => {
   onlineMap.forEach((v, k) => { if (now - v.lastSeen >= HEARTBEAT_TTL) onlineMap.delete(k); });
 }, 60000);
 
-function randomName(len = 7) {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let value = '';
-  for (let i = 0; i < len; i++) value += chars[Math.floor(Math.random() * chars.length)];
-  return value;
-}
-
-async function enforceDefaultDomain(scraper, result) {
-  const mailbox = result?.data?.mailbox;
-  if (result?.success && mailbox?.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
-    return result;
-  }
-
-  const changed = await scraper.changeEmail(randomName(), FORCED_DOMAIN);
-  if (changed.success && changed.data?.mailbox?.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
-    return changed;
-  }
-
-  return {
-    success: false,
-    error: `Only @${FORCED_DOMAIN} addresses are supported`,
-  };
-}
-
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -63,45 +38,56 @@ app.use(session({
 
 const scraperStore = new Map();
 function getScraperForSession(id) {
-  if (!scraperStore.has(id)) scraperStore.set(id, new TMailScraper());
+  if (!scraperStore.has(id)) scraperStore.set(id, new TempMailOrgScraper());
   return scraperStore.get(id);
 }
 
 app.get('/api/messages', async (req, res) => {
   try {
     const scraper = getScraperForSession(req.session.id);
-    res.json(await enforceDefaultDomain(scraper, await scraper.getMessages()));
-  }
-  catch (e) { res.status(500).json({ success: false, error: e.message }); }
+    const result = await scraper.getMessages();
+    res.json(result);
+  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
 app.post('/api/delete', async (req, res) => {
   try {
     const scraper = getScraperForSession(req.session.id);
-    res.json(await enforceDefaultDomain(scraper, await scraper.deleteEmail()));
-  }
-  catch (e) { res.status(500).json({ success: false, error: e.message }); }
+    const result = await scraper.deleteEmail();
+    res.json(result);
+  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
 app.post('/api/change', async (req, res) => {
   try {
-    const { name } = req.body;
     const scraper = getScraperForSession(req.session.id);
-    res.json(await enforceDefaultDomain(scraper, await scraper.changeEmail(name, FORCED_DOMAIN)));
+    const result = await scraper.changeEmail();
+    res.json(result);
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
 app.get('/api/view/:id', async (req, res) => {
-  try { res.json(await getScraperForSession(req.session.id).viewMessage(req.params.id)); }
-  catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  try {
+    const scraper = getScraperForSession(req.session.id);
+    const result = await scraper.viewMessage(req.params.id);
+    res.json(result);
+  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
 app.get('/api/reset', async (req, res) => {
   try {
+    const old = scraperStore.get(req.session.id);
+    if (old && typeof old.close === 'function') await old.close();
     scraperStore.delete(req.session.id);
     const scraper = getScraperForSession(req.session.id);
-    res.json(await enforceDefaultDomain(scraper, await scraper.getMessages()));
+    const result = await scraper.getMessages();
+    res.json(result);
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+// ── Provider info ──────────────────────────────────────────────────────────
+app.get('/api/provider', (req, res) => {
+  res.json({ provider: 'tempMailOrg' });
 });
 
 // ── Heartbeat ──────────────────────────────────────────────────────────────
