@@ -192,20 +192,31 @@ app.get('/api/messages', async (req, res) => {
     const provider = getProviderForSession(req.session.id);
     const isNewScraper = !scraperStore.has(req.session.id);
     const scraper = getActiveScraperForSession(req.session.id);
+
+    // Restore email dari client hint (untuk server restart & serverless/Netlify)
+    // req.session.savedEmail bekerja di env persistent; req.query.restore adalah fallback
+    // yang dikirim frontend dari localStorage saat scraper baru dibuat.
+    if (isNewScraper && provider === 'tmail') {
+      const hint = req.session.savedEmail || (req.query.restore ? String(req.query.restore) : null);
+      if (hint) {
+        const savedName = hint.split('@')[0].replace(/[^a-z0-9_.-]/gi, '');
+        if (savedName) {
+          await scraper.changeEmail(savedName, FORCED_DOMAIN);
+        }
+      }
+    }
+
     let result = await scraper.getMessages();
 
     if (provider === 'tmail') {
       if (result.success && result.data && result.data.mailbox) {
         const mailbox = result.data.mailbox;
-        if (isNewScraper && req.session.savedEmail && req.session.savedEmail !== mailbox) {
-          const [savedName] = req.session.savedEmail.split('@');
-          const restored = await scraper.changeEmail(savedName, FORCED_DOMAIN);
-          if (restored.success) result = { success: true, data: restored.data };
-        } else if (!mailbox.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
+        if (!mailbox.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
           result = await enforceDefaultDomain(scraper, result);
         }
+      } else {
+        result = await enforceDefaultDomain(scraper, result);
       }
-      result = await enforceDefaultDomain(scraper, result);
     }
 
     if (result.success && result.data?.mailbox) req.session.savedEmail = result.data.mailbox;

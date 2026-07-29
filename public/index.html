@@ -3330,7 +3330,7 @@
 
   let _rateLimitUntil = 0; // timestamp sampai kapan rate-limited
 
-  async function fetchMessages(silent=false) {
+  async function fetchMessages(silent=false, _restoreOnce=false) {
     // Jika masih dalam cooldown 429, skip fetch diam-diam
     if (Date.now() < _rateLimitUntil) {
       const secLeft = Math.ceil((_rateLimitUntil - Date.now()) / 1000);
@@ -3339,7 +3339,14 @@
     }
     if (!silent) { setStatus('loading', 'Checking your inbox...'); showInboxSkeleton(); }
     try {
-      const res = await fetch('/api/messages');
+      // Pada pemanggilan pertama, kirim email tersimpan sebagai hint restore
+      // agar server bisa kembalikan email yang sama meski scraper baru (server restart / serverless)
+      let apiUrl = '/api/messages';
+      if (_restoreOnce) {
+        const _saved = localStorage.getItem('nm-email');
+        if (_saved) apiUrl = '/api/messages?restore=' + encodeURIComponent(_saved);
+      }
+      const res = await fetch(apiUrl);
       // Handle 429 rate limit
       if (res.status === 429) {
         const retryAfter = parseInt(res.headers.get('Retry-After') || '30', 10);
@@ -3668,7 +3675,9 @@ a{color:#1a6ed8!important;}
 
   // ─── INIT ─────────────────────────────────────────────────────────────────
   (async function() {
-    await fetchMessages(false);
+    // _restoreOnce=true: kirim nm-email dari localStorage sebagai hint restore
+    // agar email tidak berganti saat server restart atau di lingkungan serverless (Netlify)
+    await fetchMessages(false, true);
     startAutoRefresh();
   })();
 </script>
