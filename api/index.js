@@ -51,22 +51,54 @@ const HEADERS = {
 // sessionStore: sid → { token, mailbox }
 const sessionStore = new Map();
 
-async function createMailbox() {
-  const res = await axios.post(`${WEB2}/mailbox`, {}, {
-    headers: HEADERS,
-    timeout: 15000,
-  });
-  const { token, mailbox } = res.data;
-  if (!token || !mailbox) throw new Error('No token/mailbox in response');
-  return { token, mailbox };
+async function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
 }
 
-async function fetchMailbox(token) {
-  const res = await axios.get(`${WEB2}/messages`, {
-    headers: { ...HEADERS, Authorization: `Bearer ${token}` },
-    timeout: 15000,
-  });
-  return res.data; // { mailbox, messages: [] }
+async function createMailbox(retries = 4) {
+  let lastErr;
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await axios.post(`${WEB2}/mailbox`, {}, {
+        headers: HEADERS,
+        timeout: 15000,
+      });
+      const { token, mailbox } = res.data;
+      if (!token || !mailbox) throw new Error('No token/mailbox in response');
+      return { token, mailbox };
+    } catch (err) {
+      lastErr = err;
+      const status = err.response?.status;
+      // Jika bukan 429/503 langsung lempar tanpa retry
+      if (status && status !== 429 && status !== 503) throw err;
+      // Exponential backoff: 1s, 2s, 4s, 8s
+      const delay = Math.pow(2, i) * 1000;
+      console.warn(`[createMailbox] attempt ${i + 1} gagal (${status || err.message}), retry dalam ${delay}ms…`);
+      await sleep(delay);
+    }
+  }
+  throw new Error('Layanan email sedang sibuk, coba lagi dalam beberapa saat. (' + (lastErr?.response?.status || lastErr?.message) + ')');
+}
+
+async function fetchMailbox(token, retries = 3) {
+  let lastErr;
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await axios.get(`${WEB2}/messages`, {
+        headers: { ...HEADERS, Authorization: `Bearer ${token}` },
+        timeout: 15000,
+      });
+      return res.data; // { mailbox, messages: [] }
+    } catch (err) {
+      lastErr = err;
+      const status = err.response?.status;
+      if (status && status !== 429 && status !== 503) throw err;
+      const delay = Math.pow(2, i) * 1000;
+      console.warn(`[fetchMailbox] attempt ${i + 1} gagal (${status || err.message}), retry dalam ${delay}ms…`);
+      await sleep(delay);
+    }
+  }
+  throw lastErr;
 }
 
 async function getOrCreateSession(sid) {
