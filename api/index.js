@@ -1,7 +1,7 @@
-const express = require('express');
-const session = require('express-session');
-const cors    = require('cors');
-const axios   = require('axios');
+const express       = require('express');
+const cookieSession = require('cookie-session');
+const cors          = require('cors');
+const axios         = require('axios');
 
 const app = express();
 
@@ -29,11 +29,14 @@ setInterval(() => {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
+// cookie-session: data disimpan LANGSUNG di cookie browser (bukan server memory)
+// → email tetap sama walau Netlify cold start berkali-kali
+app.use(cookieSession({
+  name: 'nm_sess',
   secret: process.env.SESSION_SECRET || 'tmail-scraper-secret-2026',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
+  maxAge: 24 * 60 * 60 * 1000,
+  httpOnly: true,
+  sameSite: 'lax',
 }));
 
 // ── Axios-based TempMail scraper (serverless-compatible) ───────────────────
@@ -224,7 +227,8 @@ app.post('/api/provider', async (req, res) => {
 
 // ── POST /api/heartbeat ────────────────────────────────────────────────────
 app.post('/api/heartbeat', (req, res) => {
-  const sid = req.session.id;
+  // cookie-session tidak punya .id — pakai mailbox sebagai identifier unik
+  const sid = req.session.mailbox || req.headers['x-forwarded-for'] || 'anon';
   const ex = onlineMap.get(sid);
   if (!ex) { siteStats.total_visits++; onlineMap.set(sid, { lastSeen: Date.now() }); }
   else ex.lastSeen = Date.now();
