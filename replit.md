@@ -1,45 +1,39 @@
-# TempMail Scraper
+# NovaMail
 
-A real-time disposable email web app powered by scraping tmail.etokom.com.
+Instant disposable email (temp mail) web app with real-time inbox.
 
-## Architecture
-
-- **Backend**: Express.js server (`server.js`) acting as a proxy/scraper
-- **Scraper**: `src/scrape/scraper.js` — session-based scraper using axios
-- **Frontend**: `public/index.html` — single-file responsive UI (mobile + desktop)
-
-## How It Works
-
-1. Each browser session gets its own scraper instance (stored in `scraperStore` Map by session ID)
-2. On first request, the scraper fetches a session + CSRF token from tmail.etokom.com
-3. The scraper posts to `tmail.etokom.com/get_messages` with proper cookies/CSRF
-4. The frontend polls `/api/messages` every 5 seconds for real-time updates
-
-## API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/messages` | Get current email + inbox messages |
-| POST | `/api/delete` | Delete current email (new one auto-created) |
-| POST | `/api/change` | Change email (body: `{ name, domain }`) |
-| GET | `/api/view/:id` | View a specific email message |
-| GET | `/api/reset` | Reset session and get fresh email |
-
-## Available Domain
-
-- `us.seebestdeals.com`
+## Stack
+- **Backend**: Node.js 24.x + Express
+- **Scraping**: Axios — scrapes `us.seebestdeals.com` for temp mailboxes
+- **Frontend**: Single-file vanilla HTML/CSS/JS (`public/index.html`)
+- **Session**: `express-session` (in-memory)
 
 ## Run
-
 ```bash
-node server.js
+npm install
+npm start          # or: node server.js
 ```
+Server listens on port 5000 (or `$PORT`).
 
-Server starts on port 5000 (configurable via `PORT` env var).
+## Key files
+| Path | Purpose |
+|---|---|
+| `server.js` | Express server + all API routes |
+| `src/scrape/scraper.js` | TempMail scraper logic |
+| `public/index.html` | Frontend single-page app |
+| `api/index.js` | Serverless entry point (Vercel/Netlify) |
+| `data/stats.dat` | Persisted visit/peak stats |
 
-## Dependencies
+## API endpoints
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/messages` | Fetch active email + inbox |
+| POST | `/api/delete` | Delete email, create new one |
+| POST | `/api/change` | Change email name (domain stays `us.seebestdeals.com`) |
+| GET | `/api/view/:id` | Read a specific message |
+| GET | `/api/reset` | Reset session, get fresh email |
+| POST | `/api/heartbeat` | Online visitor tracking |
+| GET | `/api/stats` | Online count, total visits, peak |
+| GET | `/api/server-info` | Runtime/system info |
 
-- `express` — web server
-- `express-session` — per-user session management
-- `axios` — HTTP scraping
-- `cors` — cross-origin support
+## User preferences
