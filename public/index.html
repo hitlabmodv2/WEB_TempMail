@@ -3312,6 +3312,7 @@
   // ─── FETCH MESSAGES ───────────────────────────────────────────────────────
   let currentEmail = '', currentMessages = [], countdown = 5;
   let seenMessageIds = null; // null = belum diinisialisasi (fetch pertama)
+  let _userTriggeredChange = false; // true hanya saat user sengaja delete/change
 
   function showInboxSkeleton() {
     const inbox = document.getElementById('inboxContent');
@@ -3337,22 +3338,23 @@
         const messages = data.data.messages || [];
         if (mailbox && mailbox !== currentEmail) {
           const prevEmail = localStorage.getItem('nm-email');
-          const isNew = !prevEmail || prevEmail !== mailbox;
           currentEmail = mailbox;
           document.getElementById('emailDisplay').value = currentEmail;
           localStorage.setItem('nm-email', mailbox);
+
           if (!prevEmail) {
-            // Pertama kali buka — email baru
-            setStatus('success','Email ready — auto-refreshing every 5 seconds');
-            showToast('Email address generated!','success');
-          } else if (isNew) {
-            // Email berubah (misal setelah server restart atau delete)
-            setStatus('success','Email ready — auto-refreshing every 5 seconds');
-            showToast('New email address assigned!','success');
+            // Benar-benar pertama kali buka — belum pernah ada email
+            setStatus('success', 'Email ready — auto-refreshing every 5 seconds');
+            showToast('Email address generated!', 'success');
+          } else if (_userTriggeredChange) {
+            // User sengaja delete/change → boleh tampilkan toast
+            setStatus('success', 'Email ready — auto-refreshing every 5 seconds');
+            showToast('New email address assigned!', 'success');
           } else {
-            // Refresh biasa — email sama, tidak perlu toast
-            setStatus('success', `Inbox synced — ${(currentMessages||[]).length} message(s)`);
+            // Server restart / sesi hilang → diam-diam update email tanpa toast
+            setStatus('success', 'Email ready — auto-refreshing every 5 seconds');
           }
+          _userTriggeredChange = false; // reset setelah dipakai
         }
         currentMessages = messages;
         renderInbox(messages);
@@ -3415,6 +3417,7 @@
       currentEmail = ''; currentMessages = []; seenMessageIds = null;
       document.getElementById('emailDisplay').value = '';
       renderInbox([]);
+      _userTriggeredChange = true;
       await fetchMessages(false);
       showToast('Email deleted — new one generated','success');
       showAlisaNotif();
@@ -3434,6 +3437,7 @@
       const res = await fetch('/api/change', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,domain}) });
       const data = await res.json();
       if (data.success && data.data && data.data.mailbox) {
+        _userTriggeredChange = true;
         currentEmail = data.data.mailbox; currentMessages = data.data.messages || []; seenMessageIds = null;
         document.getElementById('emailDisplay').value = currentEmail;
         renderInbox(currentMessages);
