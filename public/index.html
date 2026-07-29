@@ -3328,10 +3328,27 @@
       </div>`).join('');
   }
 
+  let _rateLimitUntil = 0; // timestamp sampai kapan rate-limited
+
   async function fetchMessages(silent=false) {
+    // Jika masih dalam cooldown 429, skip fetch diam-diam
+    if (Date.now() < _rateLimitUntil) {
+      const secLeft = Math.ceil((_rateLimitUntil - Date.now()) / 1000);
+      if (!silent) setStatus('error', `Rate limited — tunggu ${secLeft}s...`);
+      return;
+    }
     if (!silent) { setStatus('loading', 'Checking your inbox...'); showInboxSkeleton(); }
     try {
       const res = await fetch('/api/messages');
+      // Handle 429 rate limit
+      if (res.status === 429) {
+        const retryAfter = parseInt(res.headers.get('Retry-After') || '30', 10);
+        const wait = (isNaN(retryAfter) ? 30 : retryAfter) * 1000;
+        _rateLimitUntil = Date.now() + wait;
+        countdown = Math.ceil(wait / 1000);
+        setStatus('error', `Rate limited — auto-retry dalam ${Math.ceil(wait/1000)}s`);
+        return;
+      }
       const data = await res.json();
       if (data.success && data.data) {
         const mailbox = data.data.mailbox;

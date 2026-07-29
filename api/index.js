@@ -209,21 +209,81 @@ app.get('/api/stats', (req, res) => {
 app.get('/api/server-info', (req, res) => {
   const os = require('os');
   const v8 = require('v8');
-  const totalMem = os.totalmem(), freeMem = os.freemem(), usedMem = totalMem - freeMem;
-  const cpus = os.cpus() || [];
-  const memUsage = process.memoryUsage();
+
+  const totalMem  = os.totalmem();
+  const freeMem   = os.freemem();
+  const usedMem   = totalMem - freeMem;
+  const cpus      = os.cpus() || [];
+  const loadAvg   = os.loadavg ? os.loadavg() : [0, 0, 0];
+  const sysUptime = os.uptime  ? os.uptime()  : 0;
+  const memUsage  = process.memoryUsage();
   const heapStats = v8.getHeapStatistics();
-  const toMB = b => (b/1024/1024).toFixed(1);
-  const toGB = b => (b/1024/1024/1024).toFixed(2);
-  const fmt = s => { const d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),sec=Math.floor(s%60); return {days:d,hours:h,mins:m,secs:sec,raw:Math.floor(s)}; };
+
+  const toMB = b => (b / 1024 / 1024).toFixed(1);
+  const toGB = b => (b / 1024 / 1024 / 1024).toFixed(2);
+  const fmt  = s => {
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = Math.floor(s % 60);
+    return { days: d, hours: h, mins: m, secs: sec, raw: Math.floor(s) };
+  };
+
+  const runtime = process.env.NETLIFY            ? 'Netlify Functions'
+                : process.env.VERCEL             ? 'Vercel Serverless'
+                : process.env.AWS_LAMBDA_FUNCTION_NAME ? 'AWS Lambda'
+                : 'Node.js';
+
   res.json({
     success: true,
-    system: { platform: os.platform(), arch: os.arch(), nodeVersion: process.version, v8Version: process.versions.v8 },
-    memory: { total: toGB(totalMem)+' GB', used: toMB(usedMem)+' MB', free: toMB(freeMem)+' MB', usedPercent: Math.round(usedMem/totalMem*100) },
-    cpu: { model: cpus[0]?.model?.trim() || 'Serverless CPU', cores: cpus.length || 1 },
-    process: { pid: process.pid, uptime: fmt(process.uptime()), heapUsed: toMB(memUsage.heapUsed)+' MB', heapTotal: toMB(memUsage.heapTotal)+' MB', rss: toMB(memUsage.rss)+' MB', heapSizeLimit: toGB(heapStats.heap_size_limit)+' GB', env: process.env.NODE_ENV || 'production' },
+    system: {
+      platform:    os.platform(),
+      type:        os.type    ? os.type()    : 'Linux',
+      release:     os.release ? os.release() : 'N/A',
+      arch:        os.arch(),
+      nodeVersion: process.version,
+      v8Version:   process.versions.v8,
+      npmVersion:  process.versions.node,
+      osUptime:    fmt(sysUptime),
+    },
+    memory: {
+      total:       toGB(totalMem) + ' GB',
+      used:        toMB(usedMem)  + ' MB',
+      free:        toMB(freeMem)  + ' MB',
+      usedPercent: Math.round((usedMem / totalMem) * 100),
+      freePercent: Math.round((freeMem / totalMem) * 100),
+      totalRaw:    totalMem,
+      usedRaw:     usedMem,
+      freeRaw:     freeMem,
+    },
+    cpu: {
+      model:       cpus[0]?.model?.trim() || 'Serverless CPU',
+      cores:       cpus.length || 1,
+      speed:       cpus[0]?.speed ? cpus[0].speed + ' MHz' : 'N/A',
+      loadAvg1:    loadAvg[0].toFixed(2),
+      loadAvg5:    loadAvg[1].toFixed(2),
+      loadAvg15:   loadAvg[2].toFixed(2),
+    },
+    process: {
+      pid:             process.pid,
+      uptime:          fmt(process.uptime()),
+      heapUsed:        toMB(memUsage.heapUsed)  + ' MB',
+      heapTotal:       toMB(memUsage.heapTotal) + ' MB',
+      heapUsedPercent: Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100),
+      rss:             toMB(memUsage.rss)      + ' MB',
+      external:        toMB(memUsage.external) + ' MB',
+      heapSizeLimit:   toGB(heapStats.heap_size_limit) + ' GB',
+      env:             process.env.NODE_ENV || 'production',
+      port:            process.env.PORT || 'N/A',
+    },
     webUptime: fmt(Math.floor((Date.now() - _instanceStart) / 1000)),
-    app: { activeSessions: sessionStore.size, framework: 'Express.js', runtime: process.env.NETLIFY ? 'Netlify Functions' : 'Node.js', serverless: !!process.env.NETLIFY },
+    app: {
+      activeSessions:       sessionStore.size,
+      totalSessionsCreated: sessionStore.size,
+      framework:            'Express.js',
+      runtime,
+      serverless:           !!(process.env.NETLIFY || process.env.VERCEL),
+    },
     timestamp: new Date().toISOString(),
   });
 });
