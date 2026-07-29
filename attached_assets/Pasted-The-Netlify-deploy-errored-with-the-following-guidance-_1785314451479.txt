@@ -1,0 +1,52 @@
+The Netlify deploy errored, with the following guidance provided:
+
+The build is failing because npm is attempting to fetch packages from a **Replit-specific package registry** (`package-firewall.replit.local`) that is not accessible in the Netlify build environment.
+
+This means your `package-lock.json` or `.npmrc` file was generated inside a Replit environment and contains a reference to Replit's internal package proxy as the registry URL.
+
+**Solution:**
+
+1. Check your `.npmrc` file (if it exists in your repo) for a registry line pointing to `package-firewall.replit.local` and remove it.
+
+2. Regenerate your `package-lock.json` outside of Replit (on your local machine or in a clean environment):
+
+```bash
+rm package-lock.json
+npm install
+```
+
+Then commit and push the updated `package-lock.json` (and cleaned `.npmrc`) to your repo:
+
+```bash
+git add package-lock.json .npmrc
+git commit -m "Fix npm registry to use default public registry"
+git push
+```
+
+This will ensure npm resolves packages from the default public registry (`https://registry.npmjs.org`) instead of Replit's internal proxy during the Netlify build.
+
+The relevant error logs are:
+
+Line 4: Preparing Git Reference refs/heads/main
+Line 5: Installing dependencies
+Line 6: mise ~/.config/mise/config.toml tools: python@3.14.3
+Line 7: mise ~/.config/mise/config.toml tools: ruby@3.4.8
+Line 8: mise ~/.config/mise/config.toml tools: go@1.26.2
+Line 9: v24.18.0 is already installed.
+Line 10: Now using node v24.18.0 (npm v11.16.0)
+Line 11: Enabling Node.js Corepack
+Line 12: No npm workspaces detected
+Line 13: Installing npm packages using npm version 11.16.0
+Line 14: Failed during stage 'Install dependencies': dependency_installation script returned non-zero exit code: 1
+Line 15: npm error code ENOTFOUND
+Line 16: npm error syscall getaddrinfo
+Line 17: npm error errno ENOTFOUND
+Line 18: npm error network request to http://package-firewall.replit.local/npm/tsscmp/-/tsscmp-1.0.6.tgz failed, reason: getaddrinfo ENOT
+Line 19: npm error network This is a problem related to network connectivity.
+Line 20: npm error network In most cases you are behind a proxy or have bad network settings.
+Line 21: npm error network
+Line 22: npm error network If you are behind a proxy, please make sure that the 'proxy' config is set properly.  See: 'npm help config'
+Line 23: npm error A complete log of this run can be found in: /opt/buildhome/.npm/_logs/2026-07-29T08_38_58_601Z-debug-0.log
+Line 24: Error during npm install
+Line 25: Failing build: Failed to install dependencies
+Line 26: Finished processing build request in 1m15.341s
