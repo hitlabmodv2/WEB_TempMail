@@ -5,7 +5,7 @@
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["express", "express-session", "axios", "cors"]
+  external_node_modules = ["express", "express-session", "axios", "cors", "wreq-js"]
 
 [[redirects]]
   from = "/api/*"
