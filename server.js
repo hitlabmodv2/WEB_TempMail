@@ -3,7 +3,8 @@ const session = require('express-session');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const TMailScraper = require('./src/scrape/scraper');
+const TMailScraper        = require('./src/scrape/scraper');
+const TempMailOrgScraper  = require('./src/scrape/tempMailOrgScraper');
 
 // ── Stats persistence (data/stats.dat) ────────────────────────────────────
 const STATS_FILE = path.join(__dirname, 'data', 'stats.dat');
@@ -93,13 +94,23 @@ function getScraper(req) {
   return req.session._scraper;
 }
 
-const scraperStore = new Map();
+const scraperStore   = new Map(); // sessionId → scraper instance
+const providerStore  = new Map(); // sessionId → 'tmail' | 'tempMailOrg'
+
+function getProviderForSession(sessionId) {
+  return providerStore.get(sessionId) || 'tmail';
+}
 
 function getScraperForSession(sessionId) {
   if (!scraperStore.has(sessionId)) {
     scraperStore.set(sessionId, new TMailScraper());
   }
   return scraperStore.get(sessionId);
+}
+
+function createScraperForProvider(provider) {
+  if (provider === 'tempMailOrg') return new TempMailOrgScraper();
+  return new TMailScraper();
 }
 
 const FORCED_DOMAIN = 'us.seebestdeals.com';
@@ -111,6 +122,7 @@ function randomName(len = 7) {
   return s;
 }
 
+// ── enforceDefaultDomain hanya untuk provider tmail ──────────────────────
 async function enforceDefaultDomain(scraper, result) {
   const mailbox = result?.data?.mailbox;
   if (result?.success && mailbox?.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
@@ -128,34 +140,75 @@ async function enforceDefaultDomain(scraper, result) {
   };
 }
 
+// ── Helper: ambil scraper sesuai provider session ─────────────────────────
+function getActiveScraperForSession(sessionId) {
+  if (!scraperStore.has(sessionId)) {
+    const provider = getProviderForSession(sessionId);
+    scraperStore.set(sessionId, createScraperForProvider(provider));
+  }
+  return scraperStore.get(sessionId);
+}
+
+// ── GET /api/provider — cek provider aktif ────────────────────────────────
+app.get('/api/provider', (req, res) => {
+  res.json({ provider: getProviderForSession(req.session.id) });
+});
+
+// ── POST /api/provider — ganti provider ──────────────────────────────────
+app.post('/api/provider', async (req, res) => {
+  try {
+    const { provider } = req.body;
+    if (!['tmail', 'tempMailOrg'].includes(provider)) {
+      return res.status(400).json({ success: false, error: 'Provider tidak valid. Gunakan: tmail | tempMailOrg' });
+    }
+
+    // Tutup scraper lama jika ada
+    const old = scraperStore.get(req.session.id);
+    if (old && typeof old.close === 'function') await old.close();
+    scraperStore.delete(req.session.id);
+
+    providerStore.set(req.session.id, provider);
+    req.session.provider = provider;
+
+    const scraper = getActiveScraperForSession(req.session.id);
+    const result  = await scraper.getMessages();
+
+    // Terapkan domain default hanya untuk provider tmail
+    if (provider === 'tmail') {
+      const enforced = await enforceDefaultDomain(scraper, result);
+      if (enforced.success && enforced.data?.mailbox) req.session.savedEmail = enforced.data.mailbox;
+      return res.json({ success: true, provider, ...enforced });
+    }
+
+    if (result.success && result.data?.mailbox) req.session.savedEmail = result.data.mailbox;
+    res.json({ success: true, provider, ...result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.get('/api/messages', async (req, res) => {
   try {
+    const provider = getProviderForSession(req.session.id);
     const isNewScraper = !scraperStore.has(req.session.id);
-    const scraper = getScraperForSession(req.session.id);
+    const scraper = getActiveScraperForSession(req.session.id);
     let result = await scraper.getMessages();
 
-    if (result.success && result.data && result.data.mailbox) {
-      const mailbox = result.data.mailbox;
-
-      // Jika scraper baru (server restart) dan session punya email tersimpan → restore
-      if (isNewScraper && req.session.savedEmail && req.session.savedEmail !== mailbox) {
-        const [savedName] = req.session.savedEmail.split('@');
-        const restored = await scraper.changeEmail(savedName, FORCED_DOMAIN);
-        if (restored.success) {
-          result = { success: true, data: restored.data };
+    if (provider === 'tmail') {
+      if (result.success && result.data && result.data.mailbox) {
+        const mailbox = result.data.mailbox;
+        if (isNewScraper && req.session.savedEmail && req.session.savedEmail !== mailbox) {
+          const [savedName] = req.session.savedEmail.split('@');
+          const restored = await scraper.changeEmail(savedName, FORCED_DOMAIN);
+          if (restored.success) result = { success: true, data: restored.data };
+        } else if (!mailbox.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
+          result = await enforceDefaultDomain(scraper, result);
         }
-      } else if (!mailbox.toLowerCase().endsWith('@' + FORCED_DOMAIN)) {
-        result = await enforceDefaultDomain(scraper, result);
       }
+      result = await enforceDefaultDomain(scraper, result);
     }
 
-    result = await enforceDefaultDomain(scraper, result);
-
-    // Simpan email aktif ke session supaya bisa di-restore setelah restart
-    if (result.success && result.data && result.data.mailbox) {
-      req.session.savedEmail = result.data.mailbox;
-    }
-
+    if (result.success && result.data?.mailbox) req.session.savedEmail = result.data.mailbox;
     res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -164,9 +217,11 @@ app.get('/api/messages', async (req, res) => {
 
 app.post('/api/delete', async (req, res) => {
   try {
-    const scraper = getScraperForSession(req.session.id);
-    const result = await scraper.deleteEmail();
-    res.json(await enforceDefaultDomain(scraper, result));
+    const provider = getProviderForSession(req.session.id);
+    const scraper  = getActiveScraperForSession(req.session.id);
+    const result   = await scraper.deleteEmail();
+    if (provider === 'tmail') return res.json(await enforceDefaultDomain(scraper, result));
+    res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -175,9 +230,11 @@ app.post('/api/delete', async (req, res) => {
 app.post('/api/change', async (req, res) => {
   try {
     const { name } = req.body;
-    const scraper = getScraperForSession(req.session.id);
-    const result = await scraper.changeEmail(name, FORCED_DOMAIN);
-    res.json(await enforceDefaultDomain(scraper, result));
+    const provider = getProviderForSession(req.session.id);
+    const scraper  = getActiveScraperForSession(req.session.id);
+    const result   = await scraper.changeEmail(name, FORCED_DOMAIN);
+    if (provider === 'tmail') return res.json(await enforceDefaultDomain(scraper, result));
+    res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -185,9 +242,9 @@ app.post('/api/change', async (req, res) => {
 
 app.get('/api/view/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const scraper = getScraperForSession(req.session.id);
-    const result = await scraper.viewMessage(id);
+    const { id }  = req.params;
+    const scraper = getActiveScraperForSession(req.session.id);
+    const result  = await scraper.viewMessage(id);
     res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -224,10 +281,14 @@ app.get('/api/stats', (req, res) => {
 
 app.get('/api/reset', async (req, res) => {
   try {
+    const provider = getProviderForSession(req.session.id);
+    const old = scraperStore.get(req.session.id);
+    if (old && typeof old.close === 'function') await old.close();
     scraperStore.delete(req.session.id);
-    const scraper = getScraperForSession(req.session.id);
-    const result = await scraper.getMessages();
-    res.json(await enforceDefaultDomain(scraper, result));
+    const scraper = getActiveScraperForSession(req.session.id);
+    const result  = await scraper.getMessages();
+    if (provider === 'tmail') return res.json(await enforceDefaultDomain(scraper, result));
+    res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
