@@ -58,7 +58,7 @@ Gratis · Aman · Tanpa registrasi · Langsung pakai.
 
 | # | Perubahan | Detail |
 |:---:|---|---|
-| 🔧 | **Bug fix: email berubah saat refresh** | Email tidak lagi berganti saat halaman di-refresh, server restart, atau deploy di lingkungan **serverless (Netlify)**. Frontend kini mengirim hint `?restore=` dari `localStorage` ke server agar email yang sama bisa dikembalikan secara otomatis. |
+| 🔧 | **Bug fix: email berubah saat refresh** | Email tidak lagi berganti saat halaman di-refresh atau Netlify cold start. Token mailbox kini disimpan di **session cookie browser** (`req.session.mailToken`) — bukan di Map memory server yang hilang setiap cold start. Endpoint juga dilengkapi **retry otomatis (backoff)** saat upstream API mengembalikan 429. |
 | 📖 | **Tab baru "Cara Pakai"** | Halaman panduan 6 langkah dipindah dari accordion tersembunyi ke **tab penuh** setara dengan Inbox / Info Server / Developer. Navigasi jadi lebih jelas dan konsisten. |
 | 🃏 | **Grid 6 kartu berjejer** | Keenam langkah sekarang tampil dalam **grid 3 kolom** (desktop) → 2 kolom (tablet) → 1 kolom (HP). Tiap kartu punya warna unik, ikon, nomor besar, deskripsi, dan tips. |
 | 🚫 | **Hapus referensi "temp-mail.org"** | Semua teks yang menyebut `temp-mail.org` di tampilan web diganti menjadi label netral (**Multi Provider**, **NovaMail**, **provider aktif**) agar tampilan lebih profesional dan tidak terikat satu layanan. |
@@ -138,23 +138,25 @@ NovaMail hadir dengan **notifikasi suara kontekstual** — berbeda tergantung je
 
 Masalah ini khususnya terjadi di lingkungan **serverless** (Netlify):
 
-**Penyebab root:** Setiap request di serverless menciptakan Node.js process baru. `scraperStore` (Map in-memory) dan `express-session` (in-memory store) keduanya kosong kembali — server tidak ingat email sebelumnya.
+**Penyebab root:** Netlify Functions bisa "tidur" dan bangun kapan saja (cold start). Setiap bangun, semua variabel di memory server kosong — termasuk Map yang menyimpan token mailbox — sehingga setiap request dianggap sesi baru dan email baru dibuat.
 
 **Solusinya (V3.0.0):**
-- Frontend menyimpan email ke `localStorage` (`nm-email`) — sudah dilakukan sejak V2.
-- Pada saat **halaman dibuka**, frontend mengirim email tersimpan sebagai parameter `?restore=EMAIL` ke endpoint `/api/messages`.
-- Server membaca parameter tersebut dan merestorasi email yang sama sebelum fetch — tanpa perlu session persisten atau database eksternal.
+- Token mailbox kini disimpan di **session cookie browser** (`req.session.mailToken` via `express-session`).
+- Cookie dikirim kembali oleh browser pada setiap request — server tinggal baca token yang sudah ada, tidak perlu buat email baru.
+- Tidak perlu database eksternal atau persistent storage.
 
 ```
-Page Load
+Cold Start terjadi
    │
-   ├─ localStorage.getItem('nm-email') → "john123@domain.com"
+   ├─ sessionStore (Map) → ❌ kosong
    │
-   └─ GET /api/messages?restore=john123@domain.com
+   └─ Browser kirim cookie → req.session.mailToken = "bearer-xyz"
               │
-              └─ Server: scraper baru? → changeEmail('john123') dulu → getMessages()
-                                                                → email tetap sama ✅
+              └─ Server: token ada di cookie → fetchMailbox(token)
+                                             → email tetap sama ✅
 ```
+
+**Bonus fix:** Endpoint `createMailbox` dan `fetchMailbox` dilengkapi **retry otomatis** (backoff 1s → 2s → 4s → 8s) saat upstream API mengembalikan 429 (rate limit).
 
 ---
 
@@ -270,7 +272,7 @@ WEB_TempMail/
 | **HTTP Client** | ![Axios](https://img.shields.io/badge/Axios-1.x-5A29E4?logo=axios&logoColor=white) + `wreq-js` (Cloudflare bypass) |
 | **Frontend** | ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3) ![JS](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black) |
 | **Audio** | Web Audio API (kontekstual, tanpa file eksternal) |
-| **Session** | `express-session` (in-memory) + `localStorage` fallback |
+| **Session** | `express-session` (cookie-based, serverless-safe) + `localStorage` fallback |
 | **Hosting** | ![Netlify](https://img.shields.io/badge/Netlify-00C7B7?logo=netlify&logoColor=white) / ![Replit](https://img.shields.io/badge/Replit-F26207?logo=replit&logoColor=white) / Docker |
 
 </div>
