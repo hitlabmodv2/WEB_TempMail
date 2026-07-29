@@ -5,8 +5,11 @@ const axios   = require('axios');
 
 const app = express();
 
-// ── Waktu start instance ───────────────────────────────────────────────────
-const _instanceStart = Date.now();
+// ── Waktu launch site (tetap, tidak reset walau serverless cold start) ────
+// Ganti nilai ini setiap kali kamu deploy ulang dari awal.
+const _instanceStart = process.env.SITE_LAUNCH_TIME
+  ? parseInt(process.env.SITE_LAUNCH_TIME, 10)
+  : new Date('2026-07-29T00:00:00Z').getTime();
 
 // ── Stats in-memory ────────────────────────────────────────────────────────
 let siteStats = { total_visits: 0, peak_online: 0 };
