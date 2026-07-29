@@ -48,9 +48,6 @@ const HEADERS = {
   'Accept-Language': 'en-US,en;q=0.9',
 };
 
-// sessionStore: sid → { token, mailbox }
-const sessionStore = new Map();
-
 async function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
@@ -101,12 +98,15 @@ async function fetchMailbox(token, retries = 3) {
   throw lastErr;
 }
 
-async function getOrCreateSession(sid) {
-  if (!sessionStore.has(sid)) {
+// Simpan token di req.session (cookie) bukan Map memory
+// → email tetap sama walau Netlify cold start
+async function getOrCreateSession(req) {
+  if (!req.session.mailToken) {
     const { token, mailbox } = await createMailbox();
-    sessionStore.set(sid, { token, mailbox });
+    req.session.mailToken = token;
+    req.session.mailbox   = mailbox;
   }
-  return sessionStore.get(sid);
+  return { token: req.session.mailToken, mailbox: req.session.mailbox };
 }
 
 function normalizeMessage(m) {
@@ -124,21 +124,22 @@ function normalizeMessage(m) {
 // ── GET /api/messages ──────────────────────────────────────────────────────
 app.get('/api/messages', async (req, res) => {
   try {
-    let sess = await getOrCreateSession(req.session.id);
+    let sess = await getOrCreateSession(req);
     let data;
     try {
       data = await fetchMailbox(sess.token);
     } catch (e) {
-      // Token kadaluarsa (401) atau error — buat mailbox baru
-      if (e.response?.status === 401 || !data?.mailbox) {
+      // Token kadaluarsa (401) — buat mailbox baru, simpan ke session cookie
+      if (e.response?.status === 401) {
         const fresh = await createMailbox();
-        sessionStore.set(req.session.id, fresh);
+        req.session.mailToken = fresh.token;
+        req.session.mailbox   = fresh.mailbox;
         sess = fresh;
         data = await fetchMailbox(sess.token);
       } else throw e;
     }
     if (!data.mailbox) return res.json({ success: false, error: 'No mailbox in response' });
-    sessionStore.get(req.session.id).mailbox = data.mailbox;
+    req.session.mailbox = data.mailbox;
     res.json({
       success: true,
       data: {
@@ -155,9 +156,9 @@ app.get('/api/messages', async (req, res) => {
 // ── POST /api/delete ───────────────────────────────────────────────────────
 app.post('/api/delete', async (req, res) => {
   try {
-    sessionStore.delete(req.session.id);
     const { token, mailbox } = await createMailbox();
-    sessionStore.set(req.session.id, { token, mailbox });
+    req.session.mailToken = token;
+    req.session.mailbox   = mailbox;
     res.json({ success: true, data: { mailbox, messages: [], histories: [] } });
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
@@ -168,9 +169,9 @@ app.post('/api/delete', async (req, res) => {
 // web2 gratis tidak support pilih nama/domain → buat mailbox baru
 app.post('/api/change', async (req, res) => {
   try {
-    sessionStore.delete(req.session.id);
     const { token, mailbox } = await createMailbox();
-    sessionStore.set(req.session.id, { token, mailbox });
+    req.session.mailToken = token;
+    req.session.mailbox   = mailbox;
     res.json({ success: true, data: { mailbox, messages: [], histories: [] } });
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
@@ -180,10 +181,10 @@ app.post('/api/change', async (req, res) => {
 // ── GET /api/view/:id ──────────────────────────────────────────────────────
 app.get('/api/view/:id', async (req, res) => {
   try {
-    const sess = sessionStore.get(req.session.id);
-    if (!sess) return res.json({ success: false, error: 'Session tidak ditemukan' });
+    const token = req.session.mailToken;
+    if (!token) return res.json({ success: false, error: 'Session tidak ditemukan' });
     const r = await axios.get(`${WEB2}/messages/${req.params.id}`, {
-      headers: { ...HEADERS, Authorization: `Bearer ${sess.token}` },
+      headers: { ...HEADERS, Authorization: `Bearer ${token}` },
       timeout: 15000,
     });
     const d = r.data;
@@ -197,9 +198,9 @@ app.get('/api/view/:id', async (req, res) => {
 // ── GET /api/reset ─────────────────────────────────────────────────────────
 app.get('/api/reset', async (req, res) => {
   try {
-    sessionStore.delete(req.session.id);
     const { token, mailbox } = await createMailbox();
-    sessionStore.set(req.session.id, { token, mailbox });
+    req.session.mailToken = token;
+    req.session.mailbox   = mailbox;
     res.json({ success: true, data: { mailbox, messages: [], histories: [] } });
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
@@ -213,7 +214,7 @@ app.get('/api/provider', (req, res) => res.json({ provider: 'tempMailOrg' }));
 app.post('/api/provider', async (req, res) => {
   // Serverless hanya pakai tempMailOrg — abaikan permintaan ganti provider
   try {
-    const sess = await getOrCreateSession(req.session.id);
+    const sess = await getOrCreateSession(req);
     const data = await fetchMailbox(sess.token);
     res.json({ success: true, provider: 'tempMailOrg', data: { mailbox: data.mailbox, messages: (data.messages || []).map(normalizeMessage), histories: [] } });
   } catch (e) {
@@ -310,8 +311,8 @@ app.get('/api/server-info', (req, res) => {
     },
     webUptime: fmt(Math.floor((Date.now() - _instanceStart) / 1000)),
     app: {
-      activeSessions:       sessionStore.size,
-      totalSessionsCreated: sessionStore.size,
+      activeSessions:       0,
+      totalSessionsCreated: 0,
       framework:            'Express.js',
       runtime,
       serverless:           !!(process.env.NETLIFY || process.env.VERCEL),
