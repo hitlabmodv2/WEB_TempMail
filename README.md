@@ -4,21 +4,18 @@
 
 <br/>
 
-<!-- Version & Date -->
 <img src="https://img.shields.io/badge/🚀_Version-V3.0.0-6366f1?style=for-the-badge&logoColor=white" alt="V3.0.0" />
 <img src="https://img.shields.io/badge/📅_Updated-29_July_2026-ec4899?style=for-the-badge&logoColor=white" alt="Updated" />
 <img src="https://img.shields.io/badge/Status-LIVE-22c55e?style=for-the-badge&logo=statuspage&logoColor=white" alt="Status" />
 
 <br/><br/>
 
-<!-- Live Demo -->
 <a href="https://webtempmail.netlify.app/">
   <img src="https://img.shields.io/badge/🌐_Live_Demo-webtempmail.netlify.app-00C7B7?style=for-the-badge&logo=netlify&logoColor=white" alt="Live Demo" />
 </a>
 
 <br/><br/>
 
-<!-- Badges -->
 <a href="https://github.com/hitlabmodv2/WEB_TempMail/stargazers">
   <img src="https://img.shields.io/github/stars/hitlabmodv2/WEB_TempMail?style=for-the-badge&logo=github&label=Stars&color=FFD700" alt="Stars" />
 </a>
@@ -38,7 +35,6 @@ Gratis · Aman · Tanpa registrasi · Langsung pakai.
 
 <a href="#-fitur">✨ Fitur</a> &nbsp;·&nbsp;
 <a href="#-yang-baru-di-v300">🆕 V3.0.0</a> &nbsp;·&nbsp;
-<a href="#-yang-baru-di-v200">📜 V2.0.0</a> &nbsp;·&nbsp;
 <a href="#-deploy">🚀 Deploy</a> &nbsp;·&nbsp;
 <a href="#-jalankan-lokal">🛠️ Lokal</a> &nbsp;·&nbsp;
 <a href="#-api-endpoints">🔌 API</a> &nbsp;·&nbsp;
@@ -52,37 +48,18 @@ Gratis · Aman · Tanpa registrasi · Langsung pakai.
 
 ## 🆕 Yang Baru di V3.0.0
 
-> 🎯 Fokus pada stabilitas, pengalaman pengguna, dan kebersihan UI.
+> 🎯 Fokus pada stabilitas serverless, anti bug email berubah, dan kebersihan UI.
 
 <div align="center">
 
 | # | Perubahan | Detail |
 |:---:|---|---|
-| 🔧 | **Bug fix: email berubah saat refresh** | Email tidak lagi berganti saat halaman di-refresh atau Netlify cold start. Token mailbox kini disimpan di **session cookie browser** (`req.session.mailToken`) — bukan di Map memory server yang hilang setiap cold start. Endpoint juga dilengkapi **retry otomatis (backoff)** saat upstream API mengembalikan 429. |
-| 📖 | **Tab baru "Cara Pakai"** | Halaman panduan 6 langkah dipindah dari accordion tersembunyi ke **tab penuh** setara dengan Inbox / Info Server / Developer. Navigasi jadi lebih jelas dan konsisten. |
-| 🃏 | **Grid 6 kartu berjejer** | Keenam langkah sekarang tampil dalam **grid 3 kolom** (desktop) → 2 kolom (tablet) → 1 kolom (HP). Tiap kartu punya warna unik, ikon, nomor besar, deskripsi, dan tips. |
-| 🚫 | **Hapus referensi "temp-mail.org"** | Semua teks yang menyebut `temp-mail.org` di tampilan web diganti menjadi label netral (**Multi Provider**, **NovaMail**, **provider aktif**) agar tampilan lebih profesional dan tidak terikat satu layanan. |
-| 🛡️ | **Restore email lebih andal** | Logika restore di server (`/api/messages`) disederhanakan — tidak ada lagi double `enforceDefaultDomain` yang bisa menimpa email yang baru saja dipulihkan. |
-
-</div>
-
----
-
-## 📜 Yang Baru di V2.0.0
-
-> Pembaruan besar — lebih cepat, lebih cerdas, lebih stabil.
-
-<div align="center">
-
-| # | Perubahan | Detail |
-|:---:|---|---|
-| 🌐 | **Platform baru** | Migrasi ke **Netlify** — deploy lebih cepat & stabil |
-| 🔄 | **Dual provider** | Dua provider email dengan fallback otomatis |
-| 🔔 | **Suara kontekstual** | Notif berbeda untuk OTP, Promo, Alert, Welcome, & Email biasa |
-| 📊 | **Server Monitor** | Halaman monitoring CPU, RAM, uptime, dan sesi aktif |
-| 🎯 | **Deteksi email baru** | Tracking pakai ID unik — tidak ada notif yang terlewat |
-| 🔒 | **Keamanan** | Session secret via environment variable |
-| 🐛 | **Bug fix notif** | Notif kini bunyi setiap email baru, bukan hanya sekali |
+| 🍪 | **Email tidak berubah saat refresh / cold start** | Ganti `express-session` (MemoryStore, hilang saat cold start) ke **`cookie-session`** — semua data sesi disimpan langsung di cookie browser, bukan di memory server. Email tetap sama walau Netlify cold start berkali-kali. |
+| 🔁 | **Retry otomatis saat rate limit 429** | `createMailbox` retry hingga 4x dengan backoff 1s → 2s → 4s → 8s. `fetchMailbox` retry 3x. Tidak langsung error ke user saat upstream API sibuk. |
+| 📦 | **Fix Netlify build error (registry Replit)** | `package-lock.json` dibersihkan dari URL registry internal Replit (`package-firewall.replit.local`) dan `.npmrc` ditambahkan agar build Netlify selalu pakai `registry.npmjs.org`. |
+| 📖 | **Tab baru "Cara Pakai"** | Panduan 6 langkah dipindah ke tab penuh setara Inbox / Info Server / Developer. Grid 3 kolom (desktop) → 2 kolom (tablet) → 1 kolom (HP). |
+| 🚫 | **Hapus referensi "temp-mail.org" dari UI** | Semua teks yang menyebut `temp-mail.org` diganti label netral (**Multi Provider**, **NovaMail**) agar tampilan lebih profesional. |
+| 🛡️ | **Logika restore disederhanakan** | Tidak ada lagi double `enforceDefaultDomain` yang bisa menimpa email yang baru dipulihkan. |
 
 </div>
 
@@ -97,7 +74,7 @@ Gratis · Aman · Tanpa registrasi · Langsung pakai.
 ║  📮 Email Instan     🔄 Auto-Refresh 5s    🌐 Multi-Provider    ║
 ║  📱 Responsive       🎨 Dark UI Modern     📲 QR Code Share     ║
 ║  🔔 Smart Notif      📊 Server Monitor     🔒 Zero Storage      ║
-║  📖 Panduan Tab      🛡️ Email Restore      🚫 Anti Spam         ║
+║  📖 Panduan Tab      🛡️ Email Stabil       🚫 Anti Spam         ║
 ╚══════════════════════════════════════════════════════════════════╝
 ```
 
@@ -112,9 +89,9 @@ Gratis · Aman · Tanpa registrasi · Langsung pakai.
 | 📲 **QR Code** | Share alamat email dengan scan QR dari HP lain |
 | 📊 **Server Info** | Monitor CPU, RAM, uptime, dan jumlah sesi aktif secara real-time |
 | 🎨 **Dark UI Modern** | Tampilan responsif mobile & desktop, nyaman di mata |
-| 📖 **Tab Cara Pakai** | Panduan 6 langkah dalam grid kartu — langsung dapat dari tab navigasi |
-| 🛡️ **Email Restore** | Email tidak berubah saat refresh atau server restart (serverless-safe) |
-| 🔒 **Privacy** | Tidak ada data yang disimpan secara permanen — tanpa tracking, tanpa iklan |
+| 📖 **Tab Cara Pakai** | Panduan 6 langkah dalam grid kartu — langsung dari tab navigasi |
+| 🛡️ **Email Stabil** | Email tidak berubah saat refresh atau Netlify cold start (cookie-session) |
+| 🔒 **Privacy** | Tidak ada data disimpan permanen — tanpa tracking, tanpa iklan |
 
 ---
 
@@ -134,29 +111,41 @@ NovaMail hadir dengan **notifikasi suara kontekstual** — berbeda tergantung je
 
 ---
 
-## 🐛 Bug Fix: Email Berubah Saat Refresh (V3.0.0)
+## 🐛 Detail Bug Fix V3.0.0
 
-Masalah ini khususnya terjadi di lingkungan **serverless** (Netlify):
+### 1. Email Berubah Saat Refresh (Cold Start)
 
-**Penyebab root:** Netlify Functions bisa "tidur" dan bangun kapan saja (cold start). Setiap bangun, semua variabel di memory server kosong — termasuk Map yang menyimpan token mailbox — sehingga setiap request dianggap sesi baru dan email baru dibuat.
+**Penyebab:** Netlify Functions serverless bisa restart kapan saja. Sebelumnya token mailbox disimpan di Map memory server — hilang setiap restart → email baru terus dibuat.
 
-**Solusinya (V3.0.0):**
-- Token mailbox kini disimpan di **session cookie browser** (`req.session.mailToken` via `express-session`).
-- Cookie dikirim kembali oleh browser pada setiap request — server tinggal baca token yang sudah ada, tidak perlu buat email baru.
-- Tidak perlu database eksternal atau persistent storage.
+**Fix:** Pakai `cookie-session` — seluruh data sesi (token mailbox) disimpan di **cookie browser**, bukan server. Browser kirim cookie tiap request → server baca token → email tetap sama.
 
 ```
-Cold Start terjadi
+Netlify cold start → memory server kosong
    │
-   ├─ sessionStore (Map) → ❌ kosong
-   │
-   └─ Browser kirim cookie → req.session.mailToken = "bearer-xyz"
+   └─ Browser kirim cookie → { mailToken: "bearer-xyz" }
               │
-              └─ Server: token ada di cookie → fetchMailbox(token)
-                                             → email tetap sama ✅
+              └─ Server baca cookie → fetchMailbox(token) → email tetap ✅
 ```
 
-**Bonus fix:** Endpoint `createMailbox` dan `fetchMailbox` dilengkapi **retry otomatis** (backoff 1s → 2s → 4s → 8s) saat upstream API mengembalikan 429 (rate limit).
+### 2. Rate Limit 429 dari Upstream API
+
+**Penyebab:** `web2.temp-mail.org` membatasi request dari IP Netlify.
+
+**Fix:** Retry otomatis dengan exponential backoff sebelum menyerah dan menampilkan error ke user.
+
+```
+Request gagal 429
+   ├─ Retry 1 → tunggu 1s
+   ├─ Retry 2 → tunggu 2s
+   ├─ Retry 3 → tunggu 4s
+   └─ Retry 4 → tunggu 8s → baru tampilkan error ✅
+```
+
+### 3. Netlify Build Error (Registry Internal Replit)
+
+**Penyebab:** `package-lock.json` berisi URL `package-firewall.replit.local` (registry internal Replit) yang tidak bisa diakses server Netlify.
+
+**Fix:** `package-lock.json` di-regenerate bersih + `.npmrc` dikunci ke `registry.npmjs.org`.
 
 ---
 
@@ -180,7 +169,7 @@ Site settings → Environment variables → Add variable
 
 | Key | Value |
 |---|---|
-| `SESSION_SECRET` | *(buat string panjang & acak, contoh: `novamail-secret-2026-xYzAbC`)* |
+| `SESSION_SECRET` | *(string panjang & acak, contoh: `novamail-secret-2026-xYzAbC`)* |
 
 ### 🐳 Docker
 
@@ -224,20 +213,21 @@ WEB_TempMail/
 │   └── index.html              ← Frontend SPA (UI lengkap, 4 tab panel)
 │
 ├── 📁 src/scrape/
-│   ├── scraper.js              ← TMailScraper (provider tmail)
+│   ├── scraper.js              ← TMailScraper (provider tmail, self-hosted)
 │   └── tempMailOrgScraper.js   ← TempMailOrgScraper (provider tempMailOrg)
 │
 ├── 📁 api/
-│   └── index.js                ← Express app (serverless entry point)
+│   └── index.js                ← Express app serverless (Netlify entry point)
 │
 ├── 📁 netlify/functions/
 │   └── api.js                  ← Netlify Function wrapper
 │
 ├── 📁 data/
-│   └── stats.dat               ← Statistik visit & online (persisten)
+│   └── stats.dat               ← Statistik visit & online (persisten, self-hosted)
 │
 ├── server.js                   ← Express server (self-hosted / lokal / Replit)
 ├── netlify.toml                ← Konfigurasi Netlify
+├── .npmrc                      ← Registry npm dikunci ke registry.npmjs.org
 ├── Dockerfile                  ← Container build
 └── package.json                ← Dependencies & scripts
 ```
@@ -248,12 +238,12 @@ WEB_TempMail/
 
 | Method | Endpoint | Deskripsi |
 |:---:|---|---|
-| `GET` | `/api/messages` | Ambil email aktif & isi inbox. Query `?restore=email` untuk restore email setelah server restart. |
+| `GET` | `/api/messages` | Ambil email aktif & isi inbox |
 | `POST` | `/api/delete` | Hapus email aktif, generate yang baru |
-| `POST` | `/api/change` | Ganti nama email (domain tetap) |
+| `POST` | `/api/change` | Ganti email baru (web2 API tidak support pilih nama) |
 | `GET` | `/api/view/:id` | Baca isi pesan tertentu |
 | `GET` | `/api/reset` | Reset sesi, buat email baru |
-| `GET` | `/api/provider` | Cek provider aktif sesi (`tmail` / `tempMailOrg`) |
+| `GET` | `/api/provider` | Cek provider aktif sesi |
 | `POST` | `/api/provider` | Ganti provider aktif |
 | `POST` | `/api/heartbeat` | Tracking pengunjung online (kirim tiap 30 detik) |
 | `GET` | `/api/stats` | Online count, total visit, peak online |
@@ -272,7 +262,7 @@ WEB_TempMail/
 | **HTTP Client** | ![Axios](https://img.shields.io/badge/Axios-1.x-5A29E4?logo=axios&logoColor=white) + `wreq-js` (Cloudflare bypass) |
 | **Frontend** | ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3) ![JS](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black) |
 | **Audio** | Web Audio API (kontekstual, tanpa file eksternal) |
-| **Session** | `express-session` (cookie-based, serverless-safe) + `localStorage` fallback |
+| **Session** | `cookie-session` (data di cookie browser, serverless-safe) |
 | **Hosting** | ![Netlify](https://img.shields.io/badge/Netlify-00C7B7?logo=netlify&logoColor=white) / ![Replit](https://img.shields.io/badge/Replit-F26207?logo=replit&logoColor=white) / Docker |
 
 </div>
