@@ -3059,48 +3059,108 @@
     } catch { return d; }
   }
 
-  // ─── NOTIFICATION SOUND ───────────────────────────────────────────────────
+  // ─── NOTIFICATION SOUND (kontekstual) ────────────────────────────────────
   let soundEnabled = true;
-  let _notifAudio = null;
-  let _notifAudioFailed = false;
-  const NOTIF_SOUND_URL = 'https://raw.githubusercontent.com/hitlabmodv2/WEB_TempMail/main/public/sounds/notif.mp3';
-  const NOTIF_SOUND_FALLBACK = '/sounds/notif.mp3';
+  let _audioCtx = null;
 
-  function getNotifAudio() {
-    if (!_notifAudio) {
-      _notifAudio = new Audio(NOTIF_SOUND_URL);
-      _notifAudio.preload = 'auto';
-      _notifAudio.volume = 0.75;
-      _notifAudio.addEventListener('error', () => {
-        _notifAudioFailed = true;
-        // Fallback lokal jika Raw GitHub sedang tidak tersedia.
-        if (_notifAudio.src !== new URL(NOTIF_SOUND_FALLBACK, window.location.href).href) {
-          _notifAudio.src = NOTIF_SOUND_FALLBACK;
-          _notifAudio.load();
-        }
-      }, { once: true });
+  function getAudioCtx() {
+    if (!_audioCtx) {
+      try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) {}
     }
-    return _notifAudio;
+    if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume().catch(() => {});
+    return _audioCtx;
   }
 
-  // Unlock autoplay policy pada interaksi pertama user
-  function unlockAudio() {
-    const audio = getNotifAudio();
-    audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
-  }
+  // Unlock AudioContext pada interaksi pertama user
+  function unlockAudio() { getAudioCtx(); }
   document.addEventListener('click', unlockAudio, { once: true });
   document.addEventListener('touchstart', unlockAudio, { once: true });
 
-  async function playNotificationSound() {
+  // Helper: mainkan nada tunggal
+  function _playTone(ctx, freq, startTime, duration, vol = 0.5, type = 'sine', fadeOut = true) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, startTime);
+    gain.gain.setValueAtTime(vol, startTime);
+    if (fadeOut) gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.01);
+  }
+
+  // ── Deteksi jenis email dari subject & pengirim ──────────────────────────
+  function detectEmailType(msg) {
+    const text = ((msg?.subject || '') + ' ' + (msg?.from || '') + ' ' + (msg?.from_name || '')).toLowerCase();
+
+    const isOtp = /\b(otp|kode|code|verif|konfirm|confirm|token|2fa|authentica|one.time|pin\b|reset password|kata sandi|password reset)/.test(text);
+    if (isOtp) return 'otp';
+
+    const isAlert = /\b(alert|warning|peringatan|security|keamanan|suspicious|unauthorized|login attempt|breach|blocked|danger|bahaya|fraud|unusual)/.test(text);
+    if (isAlert) return 'alert';
+
+    const isPromo = /\b(promo|diskon|discount|sale|cashback|gratis|free|voucher|deal|flash|off\b|hemat|belanja|toko|shop|store|offer|hadiah|reward|poin|point)/.test(text);
+    if (isPromo) return 'promo';
+
+    const isWelcome = /\b(welcome|selamat datang|congratulat|diterima|akun baru|account created|registration|registrasi|bergabung|joined|sign.?up|mendaftar|terima kasih|thank you)/.test(text);
+    if (isWelcome) return 'welcome';
+
+    return 'default';
+  }
+
+  // ── Suara per jenis ──────────────────────────────────────────────────────
+
+  // 🔐 OTP — beep ganda pendek nada tinggi, urgent
+  function _soundOtp(ctx, t) {
+    _playTone(ctx, 1200, t,       0.08, 0.4, 'square');
+    _playTone(ctx, 1200, t + 0.12, 0.08, 0.4, 'square');
+    _playTone(ctx, 1500, t + 0.24, 0.12, 0.45, 'square');
+  }
+
+  // ⚠️ Alert — nada rendah naik ke tinggi, tegas
+  function _soundAlert(ctx, t) {
+    _playTone(ctx, 300, t,        0.15, 0.5, 'sawtooth');
+    _playTone(ctx, 600, t + 0.18, 0.15, 0.5, 'sawtooth');
+    _playTone(ctx, 900, t + 0.36, 0.20, 0.55, 'sawtooth');
+  }
+
+  // 🎁 Promo — ding ceria tiga nada naik (do-mi-sol)
+  function _soundPromo(ctx, t) {
+    _playTone(ctx, 523, t,        0.18, 0.38, 'sine'); // C5
+    _playTone(ctx, 659, t + 0.20, 0.18, 0.38, 'sine'); // E5
+    _playTone(ctx, 784, t + 0.40, 0.22, 0.42, 'sine'); // G5
+  }
+
+  // 🎉 Welcome — melodi naik gembira 4 nada
+  function _soundWelcome(ctx, t) {
+    _playTone(ctx, 523, t,        0.15, 0.32, 'sine'); // C5
+    _playTone(ctx, 659, t + 0.17, 0.15, 0.32, 'sine'); // E5
+    _playTone(ctx, 784, t + 0.34, 0.15, 0.32, 'sine'); // G5
+    _playTone(ctx, 1047, t + 0.51, 0.22, 0.42, 'sine'); // C6
+  }
+
+  // 📧 Default — ding bersih dua nada
+  function _soundDefault(ctx, t) {
+    _playTone(ctx, 880, t,        0.15, 0.35, 'sine'); // A5
+    _playTone(ctx, 1100, t + 0.18, 0.18, 0.38, 'sine');
+  }
+
+  // ── Entry point utama ────────────────────────────────────────────────────
+  async function playNotificationSound(msg) {
     if (!soundEnabled) return;
+    const ctx = getAudioCtx();
+    if (!ctx) return;
     try {
-      const audio = getNotifAudio();
-      audio.currentTime = 0;
-      await audio.play();
-    } catch (_) {
-      // Autoplay bisa diblokir browser sebelum ada interaksi pengguna.
-      // Jangan menampilkan error ke console atau mengganggu inbox.
-    }
+      if (ctx.state === 'suspended') await ctx.resume();
+      const t = ctx.currentTime + 0.05;
+      const type = detectEmailType(msg);
+      if      (type === 'otp')     _soundOtp(ctx, t);
+      else if (type === 'alert')   _soundAlert(ctx, t);
+      else if (type === 'promo')   _soundPromo(ctx, t);
+      else if (type === 'welcome') _soundWelcome(ctx, t);
+      else                         _soundDefault(ctx, t);
+    } catch (_) {}
   }
 
   // Notif animasi waifu/alisa sudah dinonaktifkan sesuai permintaan
@@ -3251,6 +3311,7 @@
 
   // ─── FETCH MESSAGES ───────────────────────────────────────────────────────
   let currentEmail = '', currentMessages = [], countdown = 5;
+  let seenMessageIds = null; // null = belum diinisialisasi (fetch pertama)
 
   function showInboxSkeleton() {
     const inbox = document.getElementById('inboxContent');
@@ -3293,15 +3354,27 @@
             setStatus('success', `Inbox synced — ${(currentMessages||[]).length} message(s)`);
           }
         }
-        const prev = currentMessages.length;
         currentMessages = messages;
         renderInbox(messages);
-        if (prev > 0 && messages.length > prev) {
-          const newCount = messages.length - prev;
-          playNotificationSound();
-          showToast(`📬 ${newCount} email baru masuk!`, 'success');
-          sendBrowserNotif(newCount, messages[0]?.subject || null);
-          showWaifuNotif(newCount);
+
+        // ── Deteksi email baru pakai ID, bukan jumlah ──────────────────────
+        const currentIds = messages.map(m => String(m.id));
+        if (seenMessageIds === null) {
+          // Fetch pertama — inisialisasi tanpa notifikasi
+          seenMessageIds = new Set(currentIds);
+        } else {
+          const newMsgs = messages.filter(m => !seenMessageIds.has(String(m.id)));
+          if (newMsgs.length > 0) {
+            // Update seenIds dengan semua ID terbaru
+            seenMessageIds = new Set(currentIds);
+            playNotificationSound(newMsgs[0]);
+            showToast(`📬 ${newMsgs.length} email baru masuk!`, 'success');
+            sendBrowserNotif(newMsgs.length, newMsgs[0]?.subject || null);
+            showWaifuNotif(newMsgs.length);
+          } else {
+            // Tidak ada email baru — tetap update seenIds agar hapus yang sudah didelete
+            seenMessageIds = new Set(currentIds);
+          }
         }
         // Favicon badge: unread count
         const unreadCount = messages.filter(m => !m.is_seen).length;
@@ -3339,7 +3412,7 @@
     setStatus('loading','Deleting...');
     try {
       await fetch('/api/delete', { method:'POST' });
-      currentEmail = ''; currentMessages = [];
+      currentEmail = ''; currentMessages = []; seenMessageIds = null;
       document.getElementById('emailDisplay').value = '';
       renderInbox([]);
       await fetchMessages(false);
@@ -3361,7 +3434,7 @@
       const res = await fetch('/api/change', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,domain}) });
       const data = await res.json();
       if (data.success && data.data && data.data.mailbox) {
-        currentEmail = data.data.mailbox; currentMessages = data.data.messages || [];
+        currentEmail = data.data.mailbox; currentMessages = data.data.messages || []; seenMessageIds = null;
         document.getElementById('emailDisplay').value = currentEmail;
         renderInbox(currentMessages);
         setStatus('success','Email changed!'); showToast('Email address updated!','success');
