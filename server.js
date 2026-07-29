@@ -98,7 +98,7 @@ const scraperStore   = new Map(); // sessionId → scraper instance
 const providerStore  = new Map(); // sessionId → 'tmail' | 'tempMailOrg'
 
 function getProviderForSession(sessionId) {
-  return providerStore.get(sessionId) || 'tmail';
+  return providerStore.get(sessionId) || 'tempMailOrg';
 }
 
 function getScraperForSession(sessionId) {
